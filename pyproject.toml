@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "a11y-eco"
+dynamic = ["version"]
+description = "Accessibility and eco-design audit of a web page, from the command line, with zero runtime dependencies."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "BrivalTech" }]
+keywords = ["accessibility", "a11y", "rgaa", "eco-design", "green-it", "audit", "cli"]
+dependencies = []
+
+[project.scripts]
+a11y-eco = "a11y_eco.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[tool.hatch.version]
+path = "src/a11y_eco/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/a11y_eco"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "SIM", "PT", "RUF", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+
+[tool.coverage.run]
+source = ["a11y_eco"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_also = [
+    'if __name__ == "__main__":',
+]
