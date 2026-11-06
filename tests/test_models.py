@@ -1,7 +1,8 @@
+
+import json
 import dataclasses
 
 import pytest
-
 from a11y_eco.models import Finding, Location, Severity
 
 
@@ -28,7 +29,9 @@ def test_rank_does_not_follow_alphabetical_order() -> None:
 
 
 def test_severity_behaves_as_a_plain_string() -> None:
-    assert Severity.ERROR == "error"
+    assert isinstance(Severity.ERROR, str)
+    assert str(Severity.ERROR) == "error"
+    assert json.dumps({"severity": Severity.ERROR}) == '{"severity": "error"}'
     assert Severity("warning") is Severity.WARNING
 
 
