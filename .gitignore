@@ -9,4 +9,5 @@ dist/
 .coverage
 htmlcov/
 .idea
-DS_Stpre
+.DS_Store
+sandbox.py

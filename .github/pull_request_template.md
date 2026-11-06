@@ -20,3 +20,4 @@ a11y-eco --help
 - [ ] User-facing messages exist in both English and French
 - [ ] `CHANGELOG.md` updated under "Unreleased"
 - [ ] README.md and README.fr.md updated together if behaviour changed
+-
