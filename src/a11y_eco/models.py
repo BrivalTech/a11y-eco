@@ -50,6 +50,7 @@ class Finding:
     severity: Severity
     location: Location | None = None
     snippet: str = ""
+    reference: str = ""
 
 
 @dataclass(frozen=True, slots=True)

@@ -40,6 +40,7 @@ class Rule:
                 severity=self.severity,
                 location=element.location,
                 snippet=element.start_tag,
+                reference=self.reference,
             )
             for element in self.check(document)
         ]

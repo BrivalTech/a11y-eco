@@ -31,3 +31,4 @@ def test_decorator_wraps_check_into_rule_that_builds_findings() -> None:
     assert [f.rule_id for f in findings] == ["TEST-IMG", "TEST-IMG"]
     assert [f.severity for f in findings] == [Severity.WARNING, Severity.WARNING]
     assert [f.snippet for f in findings] == ['<img src="a.png">', '<img src="b.png">']
+    assert {f.reference for f in findings} == {"Test 1.1"}
