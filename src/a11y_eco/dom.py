@@ -8,10 +8,28 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from html.parser import HTMLParser
 
 from a11y_eco.models import Location
 
 HIDDEN_TEXT_ELEMENTS = frozenset({"script", "style", "template"})
+VOID_ELEMENTS = frozenset(
+    {
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "source",
+        "track",
+        "wbr",
+    }
+)
 
 
 @dataclass(eq=False, slots=True)
@@ -33,6 +51,7 @@ class Element:
     tag: str
     attrs: dict[str, str] = field(default_factory=dict)
     location: Location | None = None
+    start_tag: str = field(default="", repr=False)
     parent: Element | None = field(default=None, repr=False)
     children: list[Element | Text] = field(default_factory=list, repr=False)
 
@@ -154,3 +173,64 @@ class Document:
             The first matching element, or None.
         """
         return next((e for e in self.root.iter() if e.get("id") == element_id), None)
+
+
+def parse_html(markup: str) -> Document:
+    """Parse HTML source into a document.
+
+    Args:
+        markup: The HTML source, already decoded to text.
+
+    Returns:
+        The parsed document.
+    """
+    builder = _TreeBuilder()
+    builder.feed(markup)
+    builder.close()
+    return builder.document
+
+
+class _TreeBuilder(HTMLParser):
+    """Turn the events emitted by ``html.parser`` into a tree of nodes."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.document = Document()
+        self._open_elements: list[Element] = [self.document.root]
+
+    @property
+    def _current(self) -> Element:
+        return self._open_elements[-1]
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        line, offset = self.getpos()
+        element = Element(
+            tag,
+            _normalize_attrs(attrs),
+            location=Location(line, offset + 1),
+            start_tag=self.get_starttag_text() or "",
+        )
+        self._current.append(element)
+        if tag not in VOID_ELEMENTS:
+            self._open_elements.append(element)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in VOID_ELEMENTS:
+            return
+        if self._current.tag == tag:
+            self._open_elements.pop()
+
+    def handle_data(self, data: str) -> None:
+        self._current.append(Text(data))
+
+
+def _normalize_attrs(attrs: list[tuple[str, str | None]]) -> dict[str, str]:
+    """Convert ``html.parser`` attributes into a dictionary.
+
+    An attribute without a value becomes the empty string, and when an attribute is
+    duplicated the first occurrence wins, as in browsers.
+    """
+    normalized: dict[str, str] = {}
+    for name, value in attrs:
+        normalized.setdefault(name, value or "")
+    return normalized
