@@ -15,3 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Continuous integration: lint, tests on Python 3.12 and 3.13 (Linux, Windows, macOS),
   package build and smoke test, aggregate `CI OK` check required on `main`.
 - English and French README, MIT license.
+- Language-neutral data model: `Severity` (ordered by rank, never alphabetically),
+  `Location` (1-based line and column) and immutable `Finding`.
+- Lightweight DOM built on the standard library `html.parser`: lowercase names,
+  attributes without value read as empty strings, first duplicated attribute wins,
+  void elements, source position and original start tag of every element.
+- Browser-like error recovery: omitted end tags (`li`, `p`, `td`, `th`, `tr`, `option`,
+  `dt`, `dd`), unclosed elements and stray end tags.
