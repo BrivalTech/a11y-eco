@@ -1,8 +1,8 @@
-
-import json
 import dataclasses
+import json
 
 import pytest
+
 from a11y_eco.models import Finding, Location, Severity
 
 
