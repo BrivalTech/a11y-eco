@@ -1,12 +1,18 @@
 """Lightweight DOM built from static HTML.
 
-It takes what the checks need: elements with their attributes, text, and the
+It only holds what the checks need: elements with their attributes, text, and the
 links between parents and children. There is no CSS, no script execution, no layout.
+
+The parser recovers from common errors the way browsers do: omitted end tags
+(``li``, ``p``, ``td``, ``option``…), unclosed elements and stray end tags. It is not
+a full implementation of the HTML standard: overlapping formatting elements and
+elements that browsers insert on their own (``tbody``, a missing ``body``) are not
+handled.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 
@@ -30,6 +36,51 @@ VOID_ELEMENTS = frozenset(
         "wbr",
     }
 )
+_CLOSES_PARAGRAPH = frozenset(
+    {
+        "address",
+        "article",
+        "aside",
+        "blockquote",
+        "dd",
+        "details",
+        "div",
+        "dl",
+        "dt",
+        "fieldset",
+        "figcaption",
+        "figure",
+        "footer",
+        "form",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "header",
+        "hr",
+        "li",
+        "main",
+        "nav",
+        "ol",
+        "p",
+        "pre",
+        "section",
+        "table",
+        "ul",
+    }
+)
+_PARAGRAPH_SCOPE = frozenset({"button", "caption", "table", "td", "template", "th"})
+_IMPLIED_END_TAGS: dict[str, tuple[frozenset[str], frozenset[str]]] = {
+    "li": (frozenset({"li"}), frozenset({"ol", "ul"})),
+    "dt": (frozenset({"dd", "dt"}), frozenset({"dl"})),
+    "dd": (frozenset({"dd", "dt"}), frozenset({"dl"})),
+    "option": (frozenset({"option"}), frozenset({"datalist", "optgroup", "select"})),
+    "tr": (frozenset({"tr"}), frozenset({"table", "tbody", "tfoot", "thead"})),
+    "td": (frozenset({"td", "th"}), frozenset({"table", "tr"})),
+    "th": (frozenset({"td", "th"}), frozenset({"table", "tr"})),
+}
 
 
 @dataclass(eq=False, slots=True)
@@ -203,6 +254,7 @@ class _TreeBuilder(HTMLParser):
         return self._open_elements[-1]
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self._close_implied_elements(tag)
         line, offset = self.getpos()
         element = Element(
             tag,
@@ -217,11 +269,33 @@ class _TreeBuilder(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         if tag in VOID_ELEMENTS:
             return
-        if self._current.tag == tag:
-            self._open_elements.pop()
+        self._close_nearest({tag})
 
     def handle_data(self, data: str) -> None:
         self._current.append(Text(data))
+
+    def _close_implied_elements(self, tag: str) -> None:
+        """Close the elements whose end tag may be omitted before ``tag``."""
+        if tag in _CLOSES_PARAGRAPH:
+            self._close_nearest({"p"}, boundaries=_PARAGRAPH_SCOPE)
+        if tag in _IMPLIED_END_TAGS:
+            targets, boundaries = _IMPLIED_END_TAGS[tag]
+            self._close_nearest(targets, boundaries=boundaries)
+
+    def _close_nearest(self, targets: Collection[str], boundaries: Collection[str] = ()) -> None:
+        """Close the nearest open element among ``targets``, unless a boundary comes first.
+
+        The search goes from the most recently opened element outwards. The element
+        found is closed together with every element opened after it. The document
+        root is never closed.
+        """
+        for index in range(len(self._open_elements) - 1, 0, -1):
+            tag = self._open_elements[index].tag
+            if tag in targets:
+                del self._open_elements[index:]
+                return
+            if tag in boundaries:
+                return
 
 
 def _normalize_attrs(attrs: list[tuple[str, str | None]]) -> dict[str, str]:
