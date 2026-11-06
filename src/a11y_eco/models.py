@@ -50,3 +50,39 @@ class Finding:
     severity: Severity
     location: Location | None = None
     snippet: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class Report:
+    """The result of an audit."""
+
+    location: str
+    """Path or URL of the audited page."""
+
+    page_size: int
+    """Size of the HTML in bytes."""
+
+    findings: tuple[Finding, ...]
+    """Every problem found, in rule order then document order."""
+
+    def count(self, severity: Severity) -> int:
+        """Count the findings of exactly one severity.
+
+        Args:
+            severity: The severity to count.
+
+        Returns:
+            The number of findings with this severity.
+        """
+        return sum(1 for finding in self.findings if finding.severity is severity)
+
+    def reaches(self, threshold: Severity) -> bool:
+        """Tell whether at least one finding is at or above a severity.
+
+        Args:
+            threshold: The minimum severity.
+
+        Returns:
+            True if a finding reaches the threshold.
+        """
+        return any(finding.severity.is_at_least(threshold) for finding in self.findings)
