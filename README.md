@@ -26,6 +26,22 @@ with **zero runtime dependencies**.
 - A full RGAA audit: automated checks cover a small subset of the criteria and never replace
   a manual audit.
 
+## Usage
+
+```sh
+a11y-eco audit page.html                 # a local file
+a11y-eco audit https://example.com       # a web page
+a11y-eco audit page.html --fail-on warning
+```
+
+| Exit status | Meaning                                                        |
+|-------------|----------------------------------------------------------------|
+| `0`         | No finding reaches the `--fail-on` severity (default: `error`) |
+| `1`         | At least one finding reaches it                                |
+| `2`         | Invalid arguments, or the page could not be loaded             |
+
+Colours are used only in an interactive terminal, and never when `NO_COLOR` is set.
+
 ## Development
 
 Requires Python 3.12 or later and pip 25.1 or later.
