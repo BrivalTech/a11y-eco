@@ -29,6 +29,22 @@ Audit d'**accessibilité** et d'**éco-conception** d'une page web, en ligne de 
 - Un audit RGAA complet : les vérifications automatiques couvrent une petite partie des critères
   et ne remplacent jamais un audit manuel.
 
+## Utilisation
+
+```sh
+a11y-eco audit page.html                 # un fichier local
+a11y-eco audit https://example.com       # une page web
+a11y-eco audit page.html --fail-on warning
+```
+
+| Code de sortie | Signification                                                           |
+|----------------|-------------------------------------------------------------------------|
+| `0`            | Aucun problème n'atteint la sévérité `--fail-on` (par défaut : `error`) |
+| `1`            | Au moins un problème l'atteint                                          |
+| `2`            | Arguments invalides, ou page impossible à charger                       |
+
+Les couleurs ne sont utilisées que dans un terminal interactif, et jamais quand `NO_COLOR` est définie.
+
 ## Développement
 
 Nécessite Python 3.12 ou plus récent et pip 25.1 ou plus récent.
