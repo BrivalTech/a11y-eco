@@ -22,3 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   void elements, source position and original start tag of every element.
 - Browser-like error recovery: omitted end tags (`li`, `p`, `td`, `th`, `tr`, `option`,
   `dt`, `dd`), unclosed elements and stray end tags.
+- - `a11y-eco audit <file|url>` command, with `--fail-on error|warning|info|never`
+  and `--timeout`.
+- Page loader for local files and `http`/`https` URLs: browser-like encoding detection
+  (byte order mark, `Content-Type` header, `<meta charset>`, Latin-1 read as
+  Windows-1252), 10 MB limit, HTML content type check, clear error messages.
+- First accessibility rules: `A11Y-LANG-MISSING` (RGAA 8.3) and `A11Y-LANG-INVALID`
+  (RGAA 8.4).
+- Accessible console report: severity always written in full, colours only in an
+  interactive terminal, `NO_COLOR` honoured, `file:line:column` positions.
+- Strict type checking with mypy in continuous integration.
