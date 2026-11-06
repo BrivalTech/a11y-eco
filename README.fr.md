@@ -1,6 +1,6 @@
 # a11y-eco
 
-[CI](https://github.com/brivaltech/a11y-eco/actions/workflows/ci.yml)
+[![CI](https://github.com/brivaltech/a11y-eco/actions/workflows/ci.yml/badge.svg)](https://github.com/brivaltech/a11y-eco/actions/workflows/ci.yml)
 
 🇬🇧 [Read in English](README.md)
 
