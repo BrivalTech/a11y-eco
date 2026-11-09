@@ -32,3 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accessible console report: severity always written in full, colours only in an
   interactive terminal, `NO_COLOR` honoured, `file:line:column` positions.
 - Strict type checking with mypy in continuous integration.
+- - `A11Y-IMG-ALT` (RGAA 1.1): images, image map links and image buttons without
+  a text alternative; decorative images (`alt=""`, `aria-hidden`, `role="presentation"`)
+  are accepted.
+- Heading structure rules (RGAA 9.1), covering `h1`–`h6` and `role="heading"`:
+  `A11Y-HEADING-SKIP` and `A11Y-HEADING-EMPTY` (errors), `A11Y-HEADING-H1-MISSING`
+  (warning), `A11Y-HEADING-H1-MULTIPLE` (info).
+- Simplified accessible name computation, following the order of the W3C
+  specification: `aria-labelledby`, `aria-label`, native alternative, content, `title`.
+- `A11Y-LINK-NAME` (RGAA 6.2) and `A11Y-BUTTON-NAME` (RGAA 11.9): links and buttons
+  without an accessible name.
+- `A11Y-ARIA-LABELLEDBY` (RGAA 8.2): `aria-labelledby` referring to an id that does
+  not exist.
