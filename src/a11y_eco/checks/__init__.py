@@ -14,7 +14,10 @@ RULES: tuple[Rule, ...] = (
     headings.missing_main_heading,
     headings.several_main_headings,
     headings.skipped_heading_level,
+    headings.empty_heading,
     names.broken_labelledby_reference,
+    names.link_without_name,
+    names.button_without_name,
 )
 
 __all__ = ["RULES", "Rule"]

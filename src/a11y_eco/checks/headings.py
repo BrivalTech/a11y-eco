@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from a11y_eco.checks.accname import accessible_name
 from a11y_eco.checks.aria import heading_level, is_hidden
 from a11y_eco.checks.base import rule
 from a11y_eco.dom import Document, Element
@@ -42,3 +43,11 @@ def skipped_heading_level(document: Document) -> Iterator[Element]:
         if previous is not None and level > previous + 1:
             yield element
         previous = level
+
+
+@rule("A11Y-HEADING-EMPTY", severity=Severity.ERROR, reference="RGAA 9.1")
+def empty_heading(document: Document) -> Iterator[Element]:
+    """A heading must have text, possibly the alternative of an image."""
+    for element, _ in _headings(document):
+        if not accessible_name(element, document):
+            yield element

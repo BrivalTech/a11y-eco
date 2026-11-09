@@ -88,7 +88,6 @@ def _from_content(element: Element) -> str:
         elif node.tag in HIDDEN_TEXT_ELEMENTS or hides_itself(node):
             continue
         elif own_name := _clean(node.get("aria-label")) or _native_name(node):
-            # An image or a labelled element counts as a word of its own.
             parts.append(f" {own_name} ")
         else:
             stack.extend(reversed(node.children))
