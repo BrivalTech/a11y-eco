@@ -42,11 +42,22 @@ def has_role(element: Element, *roles: str) -> bool:
     return bool(declared) and declared[0] in roles
 
 
+def hides_itself(element: Element) -> bool:
+    """Tell whether the element itself has ``hidden`` or ``aria-hidden="true"``.
+
+    Args:
+        element: The element to inspect.
+
+    Returns:
+        True if the element carries one of the hiding attributes.
+    """
+    return element.has("hidden") or (element.get("aria-hidden") or "").strip().lower() == "true"
+
+
 def is_hidden(element: Element) -> bool:
     """Tell whether the element is removed from what assistive technologies expose.
 
-    This is the case when the element or one of its ancestors has the ``hidden``
-    attribute or ``aria-hidden="true"``.
+    This is the case when the element or one of its ancestors hides itself.
 
     Args:
         element: The element to inspect.
@@ -56,7 +67,7 @@ def is_hidden(element: Element) -> bool:
     """
     node: Element | None = element
     while node is not None:
-        if node.has("hidden") or (node.get("aria-hidden") or "").strip().lower() == "true":
+        if hides_itself(node):
             return True
         node = node.parent
     return False

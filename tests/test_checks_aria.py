@@ -1,6 +1,6 @@
 import pytest
 
-from a11y_eco.checks.aria import has_role, has_text, heading_level, is_hidden
+from a11y_eco.checks.aria import has_role, has_text, heading_level, hides_itself, is_hidden
 from a11y_eco.dom import Element, parse_html
 
 
@@ -72,3 +72,10 @@ def test_is_hidden(markup: str, expected: bool) -> None:
 def test_heading_level(markup: str, expected: int | None) -> None:
     element = next(parse_html(markup).root.iter())
     assert heading_level(element) == expected
+
+
+def test_hides_itself_ignores_ancestors() -> None:
+    img = first('<div hidden><img aria-hidden="false"></div>', "img")
+
+    assert not hides_itself(img)
+    assert is_hidden(img)
