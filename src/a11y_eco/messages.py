@@ -9,6 +9,14 @@ from a11y_eco.models import Severity
 RULE_TITLES: dict[str, str] = {
     "A11Y-LANG-MISSING": "The default language of the page is not declared",
     "A11Y-LANG-INVALID": "The language code of the page is not valid",
+    "A11Y-IMG-ALT": "Image without a text alternative",
+    "A11Y-HEADING-H1-MISSING": "The page has no level 1 heading",
+    "A11Y-HEADING-H1-MULTIPLE": "The page has several level 1 headings",
+    "A11Y-HEADING-SKIP": "Heading level skipped since the previous heading",
+    "A11Y-HEADING-EMPTY": "Heading without text",
+    "A11Y-ARIA-LABELLEDBY": "aria-labelledby refers to an id that does not exist",
+    "A11Y-LINK-NAME": "Link without an accessible name",
+    "A11Y-BUTTON-NAME": "Button without an accessible name",
 }
 SEVERITY_NAMES: dict[Severity, tuple[str, str]] = {
     Severity.ERROR: ("error", "errors"),
