@@ -17,9 +17,13 @@ def test_audit_runs_the_given_rules_and_reports_page_details() -> None:
 
 
 def test_audit_uses_every_rule_by_default() -> None:
-    report = audit(make_source('<html lang="french">'))
+    report = audit(make_source('<html lang="french"><img src="logo.png">'))
 
-    assert [f.rule_id for f in report.findings] == ["A11Y-LANG-INVALID"]
+    assert [f.rule_id for f in report.findings] == [
+        "A11Y-LANG-INVALID",
+        "A11Y-IMG-ALT",
+        "A11Y-HEADING-H1-MISSING",
+    ]
 
 
 def test_report_counts_and_thresholds() -> None:

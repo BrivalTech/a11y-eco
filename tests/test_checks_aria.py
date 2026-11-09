@@ -1,6 +1,6 @@
 import pytest
 
-from a11y_eco.checks.aria import has_role, has_text, is_hidden
+from a11y_eco.checks.aria import has_role, has_text, heading_level, is_hidden
 from a11y_eco.dom import Element, parse_html
 
 
@@ -51,3 +51,24 @@ def test_has_role_reads_the_first_declared_role(markup: str, expected: bool) -> 
 )
 def test_is_hidden(markup: str, expected: bool) -> None:
     assert is_hidden(first(markup, "img")) is expected
+
+
+@pytest.mark.parametrize(
+    ("markup", "expected"),
+    [
+        pytest.param("<h1>", 1, id="h1"),
+        pytest.param("<h6>", 6, id="h6"),
+        pytest.param('<div role="heading" aria-level="3">', 3, id="aria-heading"),
+        pytest.param('<div role="heading">', 2, id="aria-heading-default-level"),
+        pytest.param('<h4 role="heading">', 4, id="native-level-kept"),
+        pytest.param('<h1 role="heading" aria-level="2">', 2, id="aria-level-wins"),
+        pytest.param('<div role="heading" aria-level="0">', 2, id="invalid-level"),
+        pytest.param('<div role="heading" aria-level="²">', 2, id="superscript-digit"),
+        pytest.param('<h2 role="presentation">', None, id="heading-role-removed"),
+        pytest.param('<h2 role="tab">', None, id="other-role"),
+        pytest.param("<p>", None, id="not-a-heading"),
+    ],
+)
+def test_heading_level(markup: str, expected: int | None) -> None:
+    element = next(parse_html(markup).root.iter())
+    assert heading_level(element) == expected

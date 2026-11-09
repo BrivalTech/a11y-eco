@@ -62,8 +62,15 @@ def page_without_lang(tmp_path: Path) -> str:
 @pytest.fixture
 def clean_page(tmp_path: Path) -> str:
     page = tmp_path / "clean.html"
-    page.write_text('<!DOCTYPE html>\n<html lang="fr"><p>Bonjour</p></html>', encoding="utf-8")
+    page.write_text('<!DOCTYPE html>\n<html lang="fr"><h1>Bonjour</h1></html>', encoding="utf-8")
 
+    return str(page)
+
+
+@pytest.fixture
+def page_with_warning_only(tmp_path: Path) -> str:
+    page = tmp_path / "warning.html"
+    page.write_text('<!DOCTYPE html>\n<html lang="fr"><p>No h1</p></html>', encoding="utf-8")
     return str(page)
 
 
@@ -103,6 +110,16 @@ def test_fail_on_sets_the_failure_threshold(
     page_without_lang: str, fail_on: str, expected: ExitCode
 ) -> None:
     assert main(["audit", page_without_lang, "--fail-on", fail_on]) == expected
+
+
+@pytest.mark.parametrize(
+    ("fail_on", "expected"),
+    [("error", ExitCode.OK), ("warning", ExitCode.FINDINGS)],
+)
+def test_finding_below_the_threshold_does_not_fail(
+    page_with_warning_only: str, fail_on: str, expected: ExitCode
+) -> None:
+    assert main(["audit", page_with_warning_only, "--fail-on", fail_on]) == expected
 
 
 def test_unreadable_page_is_reported_on_stderr(
