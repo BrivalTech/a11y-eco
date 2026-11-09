@@ -54,6 +54,7 @@ python -m venv .venv
 source .venv/bin/activate          # Windows : .venv\Scripts\activate
 python -m pip install --upgrade pip
 python -m pip install --group dev -e .
+pre-commit install                 # lint, formatage et typage avant chaque commit
 
 python -m pytest --cov             # tests et couverture
 ruff check . && ruff format .      # lint et formatage
