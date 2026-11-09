@@ -11,14 +11,12 @@ import os
 from collections.abc import Mapping
 from typing import TextIO
 
-from a11y_eco.messages import count_severity, rule_title
+from a11y_eco.i18n import Catalog
 from a11y_eco.models import Finding, Report, Severity
 
 _SEVERITY_COLORS = {Severity.ERROR: "31", Severity.WARNING: "33", Severity.INFO: "36"}
 _BOLD = "1"
 _DIM = "2"
-_LABEL_WIDTH = max(len(severity) for severity in Severity)
-_INDENT = " " * (_LABEL_WIDTH + 2)
 _SNIPPET_MAX_LENGTH = 80
 
 
@@ -40,40 +38,54 @@ def should_use_color(stream: TextIO, environ: Mapping[str, str] = os.environ) ->
     return stream.isatty()
 
 
-def render(report: Report, *, color: bool = False) -> str:
+def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     """Write a report as text for the terminal.
 
     Args:
         report: The audit report.
+        catalog: The messages of the language to write in.
         color: Whether to add ANSI colour codes.
 
     Returns:
         The report, ending with a newline.
     """
-    title = f"Audit of {report.location} ({report.page_size:,} bytes)"
+    size = catalog.number(report.page_size)
+    title = catalog.text("report.title", location=report.location, size=size)
     lines = [_style(title, _BOLD, enabled=color), ""]
+    label_width = max(len(catalog.text(f"severity.{severity}")) for severity in Severity)
+
     for finding in report.findings:
-        lines.extend(_render_finding(finding, report.location, color=color))
+        lines.extend(_render_finding(finding, report.location, catalog, label_width, color=color))
+
     if not report.findings:
-        lines.append("No problem found by the automated checks. A manual audit is still needed.")
+        lines.append(catalog.text("report.clean"))
         lines.append("")
-    counts = (count_severity(report.count(severity), severity) for severity in reversed(Severity))
-    lines.append("Summary: " + ", ".join(counts))
+    counts = ", ".join(
+        catalog.count(f"count.{severity}", report.count(severity))
+        for severity in reversed(Severity)
+    )
+    lines.append(catalog.text("report.summary", counts=counts))
+
     return "\n".join(lines) + "\n"
 
 
-def _render_finding(finding: Finding, page: str, *, color: bool) -> list[str]:
-    label = f"{finding.severity:<{_LABEL_WIDTH}}"
+def _render_finding(
+    finding: Finding, page: str, catalog: Catalog, label_width: int, *, color: bool
+) -> list[str]:
+    label = f"{catalog.text(f'severity.{finding.severity}'):<{label_width}}"
     label = _style(label, _BOLD, _SEVERITY_COLORS[finding.severity], enabled=color)
+    indent = " " * (label_width + 2)
     position = f"{page}:{finding.location}" if finding.location else page
     references = ", ".join(part for part in (finding.rule_id, finding.reference) if part)
     lines = [
         f"{label}  {position}",
-        f"{_INDENT}{rule_title(finding.rule_id)} [{references}]",
+        f"{indent}{catalog.rule_title(finding.rule_id)} [{references}]",
     ]
+
     if finding.snippet:
-        lines.append(_INDENT + _style(_shorten(finding.snippet), _DIM, enabled=color))
+        lines.append(indent + _style(_shorten(finding.snippet), _DIM, enabled=color))
     lines.append("")
+
     return lines
 
 

@@ -14,6 +14,7 @@ from enum import IntEnum
 
 from a11y_eco import __version__
 from a11y_eco.audit import audit
+from a11y_eco.i18n import CATALOGS, Language, detect_language
 from a11y_eco.loader import LoadError, load
 from a11y_eco.models import Severity
 from a11y_eco.reporters.console import render, should_use_color
@@ -71,6 +72,12 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="SECONDS",
         help="network timeout when auditing a URL (default: %(default)s)",
     )
+    audit_parser.add_argument(
+        "--lang",
+        choices=[language.value for language in Language],
+        help="language of the report (default: the language of the system, otherwise fr)",
+    )
+
     return parser
 
 
@@ -86,12 +93,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "audit":
-        return _run_audit(args.target, fail_on=args.fail_on, timeout=args.timeout)
+        language = Language(args.lang) if args.lang else detect_language()
+        return _run_audit(
+            args.target, fail_on=args.fail_on, timeout=args.timeout, language=language
+        )
     parser.print_help()
     return ExitCode.OK
 
 
-def _run_audit(target: str, *, fail_on: str, timeout: float) -> ExitCode:
+def _run_audit(target: str, *, fail_on: str, timeout: float, language: Language) -> ExitCode:
     try:
         source = load(target, timeout=timeout)
     except LoadError as error:
@@ -100,7 +110,8 @@ def _run_audit(target: str, *, fail_on: str, timeout: float) -> ExitCode:
         return ExitCode.USAGE_ERROR
 
     report = audit(source)
-    sys.stdout.write(render(report, color=should_use_color(sys.stdout)))
+    catalog = CATALOGS[language]
+    sys.stdout.write(render(report, catalog, color=should_use_color(sys.stdout)))
 
     if fail_on != "never" and report.reaches(Severity(fail_on)):
         return ExitCode.FINDINGS

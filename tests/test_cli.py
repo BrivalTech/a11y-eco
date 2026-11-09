@@ -77,7 +77,7 @@ def page_with_warning_only(tmp_path: Path) -> str:
 def test_audit_of_a_clean_page_succeeds(
     clean_page: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    exit_code = main(["audit", clean_page])
+    exit_code = main(["audit", clean_page, "--lang", "en"])
     output = capsys.readouterr().out
 
     assert exit_code == ExitCode.OK
@@ -94,7 +94,7 @@ def test_audit_reports_findings_and_fails(
     assert exit_code == ExitCode.FINDINGS
     assert f"{page_without_lang}:2:1" in output
     assert "A11Y-LANG-MISSING" in output
-    assert "\033[" not in output  # captured output is not a terminal: no colours
+    assert "\033[" not in output
 
 
 @pytest.mark.parametrize(
@@ -122,6 +122,46 @@ def test_finding_below_the_threshold_does_not_fail(
     assert main(["audit", page_with_warning_only, "--fail-on", fail_on]) == expected
 
 
+@pytest.mark.parametrize(
+    ("lang", "expected"),
+    [("en", "Audit of"), ("fr", "Audit de")],
+)
+def test_lang_option_selects_the_report_language(
+    clean_page: str, lang: str, expected: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["audit", clean_page, "--lang", lang])
+
+    assert capsys.readouterr().out.startswith(expected)
+
+
+def test_language_is_detected_from_the_environment(
+    clean_page: str, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("LANG", "en_US.UTF-8")
+
+    main(["audit", clean_page])
+
+    assert capsys.readouterr().out.startswith("Audit of")
+
+
+def test_french_is_the_default_language(
+    clean_page: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["audit", clean_page])  # the conftest fixture removes every locale variable
+
+    assert capsys.readouterr().out.startswith("Audit de")
+
+
+def test_lang_option_wins_over_the_environment(
+    clean_page: str, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("LANG", "en_US.UTF-8")
+
+    main(["audit", clean_page, "--lang", "fr"])
+
+    assert capsys.readouterr().out.startswith("Audit de")
+
+
 def test_unreadable_page_is_reported_on_stderr(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -139,6 +179,7 @@ def test_unreadable_page_is_reported_on_stderr(
         (["--timeout", "0"], "must be greater than 0"),
         (["--timeout", "soon"], "is not a number"),
         (["--fail-on", "critical"], "invalid choice"),
+        (["--lang", "de"], "invalid choice"),
     ],
 )
 def test_invalid_options_are_usage_errors(
