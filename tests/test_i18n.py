@@ -3,7 +3,7 @@ import string
 import pytest
 
 from a11y_eco.checks import RULES
-from a11y_eco.i18n import CATALOGS, Language
+from a11y_eco.i18n import CATALOGS, Language, detect_language
 from a11y_eco.i18n.catalog import Catalog
 from a11y_eco.models import Severity
 
@@ -92,3 +92,27 @@ def test_missing_key_is_a_programming_error() -> None:
 def test_unknown_rule_title_falls_back_to_its_identifier() -> None:
     assert FR.rule_title("UNKNOWN-RULE") == "UNKNOWN-RULE"
     assert FR.rule_title("A11Y-LINK-NAME") == "Lien sans intitulé"
+
+
+@pytest.mark.parametrize(
+    ("environ", "expected"),
+    [
+        pytest.param({"LANG": "fr_FR.UTF-8"}, Language.FR, id="french-locale"),
+        pytest.param({"LANG": "en_GB.UTF-8"}, Language.EN, id="english-locale"),
+        pytest.param({"LANG": "fr_CA"}, Language.FR, id="other-french-region"),
+        pytest.param({"LANG": "FR_fr"}, Language.FR, id="uppercase"),
+        pytest.param({"LANG": "fr@euro"}, Language.FR, id="locale-modifier"),
+        pytest.param({"LANG": "en"}, Language.EN, id="code-only"),
+        pytest.param({"LC_ALL": "en_US.UTF-8", "LANG": "fr_FR"}, Language.EN, id="lc-all-wins"),
+        pytest.param(
+            {"LC_MESSAGES": "en_US", "LANG": "fr_FR"}, Language.EN, id="lc-messages-before-lang"
+        ),
+        pytest.param({"LANGUAGE": "de:en", "LANG": "fr_FR"}, Language.EN, id="language-list"),
+        pytest.param({"LC_ALL": "de_DE", "LANG": "en_US"}, Language.EN, id="unsupported-skipped"),
+        pytest.param({"LANG": "C.UTF-8"}, Language.FR, id="c-locale-uses-default"),
+        pytest.param({"LC_ALL": "", "LANG": "en_US"}, Language.EN, id="empty-variable-skipped"),
+        pytest.param({}, Language.FR, id="nothing-set-uses-default"),
+    ],
+)
+def test_detect_language(environ: dict[str, str], expected: Language) -> None:
+    assert detect_language(environ) is expected
