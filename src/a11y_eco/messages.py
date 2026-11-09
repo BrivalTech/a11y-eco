@@ -9,6 +9,7 @@ from a11y_eco.models import Severity
 RULE_TITLES: dict[str, str] = {
     "A11Y-LANG-MISSING": "The default language of the page is not declared",
     "A11Y-LANG-INVALID": "The language code of the page is not valid",
+    "A11Y-IMG-ALT": "Image without a text alternative",
 }
 SEVERITY_NAMES: dict[Severity, tuple[str, str]] = {
     Severity.ERROR: ("error", "errors"),
