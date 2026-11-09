@@ -70,3 +70,33 @@ def test_coherent_hierarchy_raises_nothing(markup: str) -> None:
 )
 def test_skipped_level_is_reported(markup: str, expected: list[str]) -> None:
     assert snippets(headings.skipped_heading_level, markup) == expected
+
+
+@pytest.mark.parametrize(
+    "markup",
+    [
+        pytest.param("<h2>Title</h2>", id="text"),
+        pytest.param('<h1><img src="logo.png" alt="Acme"></h1>', id="image-alt"),
+        pytest.param('<h2 aria-label="Title"></h2>', id="aria-label"),
+        pytest.param('<h2 aria-hidden="true"></h2>', id="hidden-heading-ignored"),
+    ],
+)
+def test_heading_with_text_raises_nothing(markup: str) -> None:
+    assert snippets(headings.empty_heading, markup) == []
+
+
+@pytest.mark.parametrize(
+    ("markup", "expected"),
+    [
+        pytest.param("<h2></h2>", "<h2>", id="empty"),
+        pytest.param("<h2>  \n </h2>", "<h2>", id="blank"),
+        pytest.param('<h1><img src="logo.png"></h1>', "<h1>", id="image-without-alt"),
+        pytest.param(
+            '<div role="heading" aria-level="2"></div>',
+            '<div role="heading" aria-level="2">',
+            id="aria-heading",
+        ),
+    ],
+)
+def test_empty_heading_is_reported(markup: str, expected: str) -> None:
+    assert snippets(headings.empty_heading, markup) == [expected]
