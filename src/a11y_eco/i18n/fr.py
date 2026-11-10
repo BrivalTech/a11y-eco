@@ -11,10 +11,8 @@ def _plural_form(count: int) -> PluralForm:
 CATALOG = Catalog(
     language="fr",
     plural_form=_plural_form,
-    # French groups digits with a narrow non-breaking space: 1 234.
     thousands_separator="\N{NARROW NO-BREAK SPACE}",
     messages={
-        # Command line
         "cli.description": "Audite l'accessibilité et l'éco-conception d'une page web.",
         "cli.commands": "commandes",
         "cli.arguments": "arguments",
@@ -44,7 +42,6 @@ CATALOG = Catalog(
             "délai d'attente réseau pour une URL, en secondes "
             "(par défaut\N{NO-BREAK SPACE}: %(default)s)"
         ),
-        # Loading errors
         "load.unreadable": "impossible de lire {path}\N{NO-BREAK SPACE}: {reason}",
         "load.too_large": "{location} dépasse la limite de {limit} octets",
         "load.not_html": "{url} n'est pas une page HTML ({content_type})",
@@ -56,7 +53,6 @@ CATALOG = Catalog(
             "Aucun problème détecté par les vérifications automatiques. "
             "Un audit manuel reste nécessaire."
         ),
-        # French typography puts a non-breaking space before ":".
         "report.summary": "Résumé\N{NO-BREAK SPACE}: {counts}",
         "severity.error": "erreur",
         "severity.warning": "avertissement",
