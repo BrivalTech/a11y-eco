@@ -32,7 +32,11 @@ with **zero runtime dependencies**.
 a11y-eco audit page.html                 # a local file
 a11y-eco audit https://example.com       # a web page
 a11y-eco audit page.html --fail-on warning
+a11y-eco audit page.html --lang en       # report in English
 ```
+
+Reports are written in English or French. The language is taken from `--lang`,
+otherwise from the system (`LANG`, `LC_ALL`…), and French is used by default.
 
 | Exit status | Meaning                                                        |
 |-------------|----------------------------------------------------------------|
@@ -51,6 +55,7 @@ python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install --upgrade pip
 python -m pip install --group dev -e .
+pre-commit install                 # run lint, format and type checks before each commit
 
 python -m pytest --cov             # tests and coverage
 ruff check . && ruff format .      # lint and format

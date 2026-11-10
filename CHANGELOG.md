@@ -44,3 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without an accessible name.
 - `A11Y-ARIA-LABELLEDBY` (RGAA 8.2): `aria-labelledby` referring to an id that does
   not exist.
+- Reports, help and error messages in English and French, with `--lang en|fr`.
+- Language detected from the `LANGUAGE`, `LC_ALL`, `LC_MESSAGES` and `LANG` environment
+  variables; French is used when none names a supported language.
+- French typography: singular for 0 ("0 erreur"), narrow non-breaking space between
+  thousands, non-breaking space before colons.
+- Command-line options can no longer be abbreviated (`--fail` for `--fail-on`), so that
+  adding an option never breaks existing scripts.
+- pre-commit hooks running Ruff and mypy before each commit, and the tests before each push.

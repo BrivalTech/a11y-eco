@@ -3,9 +3,12 @@ from textwrap import dedent
 
 import pytest
 
+from a11y_eco.i18n import CATALOGS, Language
 from a11y_eco.models import Finding, Location, Report, Severity
 from a11y_eco.reporters.console import render, should_use_color
 
+EN = CATALOGS[Language.EN]
+FR = CATALOGS[Language.FR]
 LANG_MISSING = Finding(
     rule_id="A11Y-LANG-MISSING",
     severity=Severity.ERROR,
@@ -18,7 +21,7 @@ LANG_MISSING = Finding(
 def test_renders_findings_with_position_title_and_snippet() -> None:
     report = Report(location="page.html", page_size=1234, findings=(LANG_MISSING,))
 
-    assert render(report) == dedent(
+    assert render(report, EN) == dedent(
         """\
         Audit of page.html (1,234 bytes)
 
@@ -33,7 +36,7 @@ def test_renders_findings_with_position_title_and_snippet() -> None:
 
 def test_renders_a_clean_report_without_claiming_full_compliance() -> None:
     report = Report(location="page.html", page_size=10, findings=())
-    output = render(report)
+    output = render(report, EN)
 
     assert "No problem found by the automated checks. A manual audit is still needed." in output
     assert output.endswith("Summary: 0 errors, 0 warnings, 0 info\n")
@@ -43,14 +46,14 @@ def test_finding_without_location_shows_the_page_only() -> None:
     finding = Finding(rule_id="A11Y-LANG-MISSING", severity=Severity.ERROR)
     report = Report(location="page.html", page_size=10, findings=(finding,))
 
-    assert "error    page.html\n" in render(report)
+    assert "error    page.html\n" in render(report, EN)
 
 
 def test_long_snippet_is_put_on_one_line_and_shortened() -> None:
     snippet = '<img\n   src="' + "x" * 200 + '">'
     finding = Finding(rule_id="R-1", severity=Severity.INFO, snippet=snippet)
     report = Report(location="page.html", page_size=10, findings=(finding,))
-    [snippet_line] = [line for line in render(report).splitlines() if "<img" in line]
+    [snippet_line] = [line for line in render(report, EN).splitlines() if "<img" in line]
 
     assert snippet_line.strip().startswith('<img src="xxx')
     assert len(snippet_line.strip()) == 80
@@ -61,14 +64,14 @@ def test_unknown_rule_falls_back_to_its_identifier() -> None:
     finding = Finding(rule_id="R-1", severity=Severity.WARNING)
     report = Report(location="page.html", page_size=10, findings=(finding,))
 
-    assert "R-1 [R-1]" in render(report)
+    assert "R-1 [R-1]" in render(report, EN)
 
 
 def test_colors_wrap_the_padded_label_and_are_off_by_default() -> None:
     report = Report(location="page.html", page_size=10, findings=(LANG_MISSING,))
 
-    assert "\033[" not in render(report)
-    assert "\033[1;31merror  \033[0m" in render(report, color=True)
+    assert "\033[" not in render(report, EN)
+    assert "\033[1;31merror  \033[0m" in render(report, EN, color=True)
 
 
 class FakeTerminal(io.StringIO):
@@ -87,3 +90,26 @@ class FakeTerminal(io.StringIO):
 )
 def test_should_use_color(stream: io.StringIO, environ: dict[str, str], expected: bool) -> None:
     assert should_use_color(stream, environ) is expected
+
+
+def test_renders_the_report_in_french() -> None:
+    link = Finding(
+        rule_id="A11Y-LINK-NAME",
+        severity=Severity.ERROR,
+        location=Location(line=8, column=3),
+        snippet='<a href="/">',
+        reference="RGAA 6.2",
+    )
+    report = Report(location="page.html", page_size=1234, findings=(link,))
+
+    assert render(report, FR) == dedent(
+        """\
+        Audit de page.html (1\N{NARROW NO-BREAK SPACE}234 octets)
+
+        erreur         page.html:8:3
+                       Lien sans intitulé [A11Y-LINK-NAME, RGAA 6.2]
+                       <a href="/">
+
+        Résumé\N{NO-BREAK SPACE}: 1 erreur, 0 avertissement, 0 info
+        """
+    )

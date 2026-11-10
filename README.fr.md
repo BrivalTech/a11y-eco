@@ -35,7 +35,11 @@ Audit d'**accessibilité** et d'**éco-conception** d'une page web, en ligne de 
 a11y-eco audit page.html                 # un fichier local
 a11y-eco audit https://example.com       # une page web
 a11y-eco audit page.html --fail-on warning
+a11y-eco audit page.html --lang en       # rapport en anglais
 ```
+
+Les rapports sont rédigés en français ou en anglais. La langue est prise dans `--lang`,
+sinon dans la langue du système (`LANG`, `LC_ALL`…), et le français est utilisé par défaut.
 
 | Code de sortie | Signification                                                           |
 |----------------|-------------------------------------------------------------------------|
@@ -54,6 +58,7 @@ python -m venv .venv
 source .venv/bin/activate          # Windows : .venv\Scripts\activate
 python -m pip install --upgrade pip
 python -m pip install --group dev -e .
+pre-commit install                 # lint, formatage et typage avant chaque commit
 
 python -m pytest --cov             # tests et couverture
 ruff check . && ruff format .      # lint et formatage

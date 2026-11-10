@@ -3,30 +3,30 @@
 This module only handles arguments, output streams and exit codes. The work itself
 is done by the loader, the audit and the reporters, which can all be used and
 tested without going through the command line.
+
+Texts written by this module come from the catalogs. The details of argparse's
+own error messages ("invalid choice", "unrecognized arguments"…) stay in English:
+argparse only translates them through gettext, which this tool does not use.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from enum import IntEnum
+from typing import Any, NoReturn
 
 from a11y_eco import __version__
 from a11y_eco.audit import audit
+from a11y_eco.i18n import CATALOGS, Catalog, Language, detect_language
 from a11y_eco.loader import LoadError, load
 from a11y_eco.models import Severity
 from a11y_eco.reporters.console import render, should_use_color
 
 PROG = "a11y-eco"
-
 FAIL_ON_CHOICES = [*(severity.value for severity in reversed(Severity)), "never"]
-AUDIT_EPILOG = """\
-exit status:
-  0  no finding reaches the --fail-on severity
-  1  at least one finding reaches the --fail-on severity
-  2  invalid arguments, or the page could not be loaded
-"""
+LANGUAGE_CHOICES = [language.value for language in Language]
 
 
 class ExitCode(IntEnum):
@@ -37,40 +37,64 @@ class ExitCode(IntEnum):
     USAGE_ERROR = 2
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build the argument parser.
+class _Parser(argparse.ArgumentParser):
+    """An argument parser whose own messages come from a catalog."""
+
+    def __init__(self, *, catalog: Catalog, **kwargs: Any) -> None:
+        super().__init__(allow_abbrev=False, add_help=False, **kwargs)
+        self.catalog = catalog
+
+    def error(self, message: str) -> NoReturn:
+        """Print the usage and a translated error, then exit with a usage error."""
+        self.print_usage(sys.stderr)
+        error = self.catalog.text("cli.error", prog=self.prog, message=message)
+        self.exit(ExitCode.USAGE_ERROR, error + "\n")
+
+
+def build_parser(catalog: Catalog) -> argparse.ArgumentParser:
+    """Build the argument parser, with help texts in the language of the catalog.
+
+    Args:
+        catalog: The messages of the language to write in.
 
     Returns:
         The configured top-level parser.
     """
-    parser = argparse.ArgumentParser(
-        prog=PROG,
-        description="Audit a web page for accessibility and eco-design issues.",
+    text = catalog.text
+    parser = _Parser(prog=PROG, description=text("cli.description"), catalog=catalog)
+    options = parser.add_argument_group(text("cli.options"))
+    options.add_argument("-h", "--help", action="help", help=text("cli.help"))
+    options.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}", help=text("cli.version")
     )
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    commands = parser.add_subparsers(dest="command", title="commands")
-
+    commands = parser.add_subparsers(dest="command", title=text("cli.commands"))
     audit_parser = commands.add_parser(
         "audit",
-        help="audit a web page",
-        description="Audit a web page and print the problems found.",
-        epilog=AUDIT_EPILOG,
+        help=text("cli.audit.help"),
+        description=text("cli.audit.description"),
+        epilog=text("cli.audit.epilog"),
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        catalog=catalog,
     )
-    audit_parser.add_argument("target", help="URL (http or https) or path of an HTML file")
-    audit_parser.add_argument(
+    arguments = audit_parser.add_argument_group(text("cli.arguments"))
+    arguments.add_argument("target", help=text("cli.audit.target"))
+    options = audit_parser.add_argument_group(text("cli.options"))
+    options.add_argument("-h", "--help", action="help", help=text("cli.help"))
+    options.add_argument(
         "--fail-on",
         choices=FAIL_ON_CHOICES,
         default=Severity.ERROR.value,
-        help="lowest severity that makes the command fail (default: %(default)s)",
+        help=text("cli.audit.fail_on"),
     )
-    audit_parser.add_argument(
+    options.add_argument("--lang", choices=LANGUAGE_CHOICES, help=text("cli.audit.lang"))
+    options.add_argument(
         "--timeout",
-        type=_positive_float,
+        type=_positive_number(catalog),
         default=10.0,
         metavar="SECONDS",
-        help="network timeout when auditing a URL (default: %(default)s)",
+        help=text("cli.audit.timeout"),
     )
+
     return parser
 
 
@@ -83,36 +107,72 @@ def main(argv: Sequence[str] | None = None) -> int:
     Returns:
         The process exit code.
     """
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    catalog = CATALOGS[_requested_language(arguments)]
+    parser = build_parser(catalog)
+    args = parser.parse_args(arguments)
     if args.command == "audit":
-        return _run_audit(args.target, fail_on=args.fail_on, timeout=args.timeout)
+        return _run_audit(args.target, fail_on=args.fail_on, timeout=args.timeout, catalog=catalog)
     parser.print_help()
+
     return ExitCode.OK
 
 
-def _run_audit(target: str, *, fail_on: str, timeout: float) -> ExitCode:
+def _requested_language(arguments: Sequence[str]) -> Language:
+    """Find the language asked with --lang, or detect it from the system.
+
+    An invalid value is ignored here: the parser reports it afterwards.
+    """
+    for index, argument in enumerate(arguments):
+        if argument == "--lang" and index + 1 < len(arguments):
+            value = arguments[index + 1]
+        elif argument.startswith("--lang="):
+            value = argument.removeprefix("--lang=")
+        else:
+            continue
+        if value in LANGUAGE_CHOICES:
+            return Language(value)
+
+    return detect_language()
+
+
+def _run_audit(target: str, *, fail_on: str, timeout: float, catalog: Catalog) -> ExitCode:
     try:
         source = load(target, timeout=timeout)
     except LoadError as error:
-        # Same format as argparse errors; stdout stays reserved for the report.
-        print(f"{PROG}: error: {error}", file=sys.stderr)
+        message = catalog.text(error.key, **error.params)
+        print(catalog.text("cli.error", prog=PROG, message=message), file=sys.stderr)
         return ExitCode.USAGE_ERROR
 
     report = audit(source)
-    sys.stdout.write(render(report, color=should_use_color(sys.stdout)))
+    sys.stdout.write(render(report, catalog, color=should_use_color(sys.stdout)))
 
     if fail_on != "never" and report.reaches(Severity(fail_on)):
         return ExitCode.FINDINGS
+
     return ExitCode.OK
 
 
-def _positive_float(value: str) -> float:
-    """Convert an argument to a strictly positive number, for argparse."""
-    try:
-        number = float(value)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f"{value!r} is not a number") from None
-    if number <= 0:
-        raise argparse.ArgumentTypeError(f"{value!r} must be greater than 0")
-    return number
+def _positive_number(catalog: Catalog) -> Callable[[str], float]:
+    """Build an argparse type that accepts strictly positive numbers.
+
+    Args:
+        catalog: The messages used to explain an invalid value.
+
+    Returns:
+        The conversion function given to ``add_argument(type=...)``.
+    """
+
+    def convert(value: str) -> float:
+        try:
+            number = float(value)
+        except ValueError:
+            raise argparse.ArgumentTypeError(
+                catalog.text("cli.not_a_number", value=value)
+            ) from None
+        if number <= 0:
+            raise argparse.ArgumentTypeError(catalog.text("cli.not_positive", value=value))
+
+        return number
+
+    return convert
