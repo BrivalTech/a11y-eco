@@ -71,6 +71,16 @@ def test_missing_file_is_a_load_error(tmp_path: Path) -> None:
         load(str(tmp_path / "missing.html"))
 
 
+def test_load_error_carries_its_message_key_and_values(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.html"
+
+    with pytest.raises(LoadError) as exc_info:
+        load(str(missing))
+
+    assert exc_info.value.key == "load.unreadable"
+    assert exc_info.value.params["path"] == missing
+
+
 def test_directory_is_a_load_error(tmp_path: Path) -> None:
     with pytest.raises(LoadError, match="cannot read"):
         load(str(tmp_path))

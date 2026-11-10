@@ -162,24 +162,34 @@ def test_lang_option_wins_over_the_environment(
     assert capsys.readouterr().out.startswith("Audit de")
 
 
+@pytest.mark.parametrize(
+    ("lang", "expected"),
+    [
+        ("en", f"{PROG}: error: cannot read"),
+        ("fr", f"{PROG}\N{NO-BREAK SPACE}: erreur\N{NO-BREAK SPACE}: impossible de lire"),
+    ],
+)
 def test_unreadable_page_is_reported_on_stderr(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, lang: str, expected: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    exit_code = main(["audit", str(tmp_path / "missing.html")])
+    exit_code = main(["audit", str(tmp_path / "missing.html"), "--lang", lang])
     captured = capsys.readouterr()
 
     assert exit_code == ExitCode.USAGE_ERROR
     assert captured.out == ""
-    assert captured.err.startswith(f"{PROG}: error: cannot read")
+    assert captured.err.startswith(expected)
 
 
 @pytest.mark.parametrize(
     ("arguments", "message"),
     [
-        (["--timeout", "0"], "must be greater than 0"),
-        (["--timeout", "soon"], "is not a number"),
+        (["--timeout", "0", "--lang", "en"], "must be greater than 0"),
+        (["--timeout", "0", "--lang", "fr"], "doit être supérieur à 0"),
+        (["--timeout", "soon", "--lang", "en"], "is not a number"),
+        (["--timeout", "soon", "--lang", "fr"], "n'est pas un nombre"),
         (["--fail-on", "critical"], "invalid choice"),
         (["--lang", "de"], "invalid choice"),
+        (["--fail", "error"], "unrecognized arguments"),  # abbreviations are refused
     ],
 )
 def test_invalid_options_are_usage_errors(
@@ -195,8 +205,34 @@ def test_invalid_options_are_usage_errors(
     assert message in capsys.readouterr().err
 
 
-def test_audit_help_documents_exit_status(capsys: pytest.CaptureFixture[str]) -> None:
+def test_argparse_error_details_stay_in_english(
+    clean_page: str, capsys: pytest.CaptureFixture[str]
+) -> None:
     with pytest.raises(SystemExit):
-        main(["audit", "--help"])
+        main(["audit", clean_page, "--fail-on", "critical", "--lang", "fr"])
 
-    assert "exit status:" in capsys.readouterr().out
+    error = capsys.readouterr().err
+
+    assert "erreur" in error
+    assert "invalid choice" in error
+
+
+@pytest.mark.parametrize(
+    ("lang", "expected"),
+    [("en", "exit status:"), ("fr", "code de sortie\N{NO-BREAK SPACE}:")],
+)
+def test_help_is_written_in_the_requested_language(
+    lang: str, expected: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    with pytest.raises(SystemExit):
+        main(["audit", "--help", "--lang", lang])
+
+    assert expected in capsys.readouterr().out
+
+
+def test_lang_option_accepts_the_equals_form(
+    clean_page: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["audit", clean_page, "--lang=en"])
+
+    assert capsys.readouterr().out.startswith("Audit of")

@@ -12,6 +12,34 @@ CATALOG = Catalog(
     plural_form=_plural_form,
     thousands_separator=",",
     messages={
+        "cli.description": "Audit a web page for accessibility and eco-design issues.",
+        "cli.commands": "commands",
+        "cli.arguments": "arguments",
+        "cli.options": "options",
+        "cli.help": "show this help message and exit",
+        "cli.version": "show the version number and exit",
+        "cli.error": "{prog}: error: {message}",
+        "cli.not_a_number": "{value!r} is not a number",
+        "cli.not_positive": "{value!r} must be greater than 0",
+        "cli.audit.help": "audit a web page",
+        "cli.audit.description": "Audit a web page and print the problems found.",
+        "cli.audit.epilog": (
+            "exit status:\n"
+            "  0  no finding reaches the --fail-on severity\n"
+            "  1  at least one finding reaches the --fail-on severity\n"
+            "  2  invalid arguments, or the page could not be loaded\n"
+        ),
+        "cli.audit.target": "URL (http or https) or path of an HTML file",
+        "cli.audit.fail_on": "lowest severity that makes the command fail (default: %(default)s)",
+        "cli.audit.lang": "language of the report (default: the language of the system, or fr)",
+        "cli.audit.timeout": "network timeout when auditing a URL (default: %(default)s)",
+        # Loading errors
+        "load.unreadable": "cannot read {path}: {reason}",
+        "load.too_large": "{location} is larger than the {limit}-byte limit",
+        "load.not_html": "{url} is not an HTML page ({content_type})",
+        "load.http_status": "{url} answered with HTTP status {status}",
+        "load.unreachable": "cannot reach {url}: {reason}",
+        "load.timeout": "{url} did not answer within {timeout} s",
         "report.title": "Audit of {location} ({size} bytes)",
         "report.clean": "No problem found by the automated checks. A manual audit is still needed.",
         "report.summary": "Summary: {counts}",

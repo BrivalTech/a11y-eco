@@ -16,6 +16,7 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from a11y_eco import __version__
+from a11y_eco.i18n import CATALOGS, Language
 
 MAX_BYTES = 10 * 1024 * 1024
 HTML_CONTENT_TYPES = frozenset({"text/html", "application/xhtml+xml"})
@@ -25,7 +26,18 @@ _META_PRESCAN_BYTES = 1024
 
 
 class LoadError(Exception):
-    """The page could not be loaded."""
+    """The page could not be loaded.
+
+    The error carries the key of its message and the values of its placeholders,
+    so that the command-line interface can show it in the user's language.
+    ``str(error)`` gives the English message, for logs and debugging.
+    """
+
+    def __init__(self, key: str, **params: object) -> None:
+        """Create the error from a message key and the values of its placeholders."""
+        self.key = key
+        self.params = params
+        super().__init__(CATALOGS[Language.EN].text(key, **params))
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,9 +117,8 @@ def _codec_name(label: str) -> str | None:
 def _decode(location: str, data: bytes, max_bytes: int, declared: str | None = None) -> Source:
     """Check the size of the raw page, then decode it."""
     if len(data) > max_bytes:
-        raise LoadError(f"{location} is larger than the {max_bytes}-byte limit")
+        raise LoadError("load.too_large", location=location, limit=max_bytes)
     encoding = detect_encoding(data, declared)
-    # Invalid bytes become U+FFFD instead of stopping the audit.
     text = data.decode(encoding, errors="replace")
     return Source(location=location, text=text, size=len(data), encoding=encoding)
 
@@ -115,10 +126,9 @@ def _decode(location: str, data: bytes, max_bytes: int, declared: str | None = N
 def _load_file(path: Path, *, max_bytes: int) -> Source:
     try:
         with path.open("rb") as file:
-            # Reading one byte more than allowed is enough to detect an oversized file.
             data = file.read(max_bytes + 1)
     except OSError as error:
-        raise LoadError(f"cannot read {path}: {error.strerror}") from error
+        raise LoadError("load.unreadable", path=path, reason=error.strerror) from error
     return _decode(str(path), data, max_bytes)
 
 
@@ -128,14 +138,14 @@ def _load_url(url: str, *, timeout: float, max_bytes: int) -> Source:
         with urlopen(request, timeout=timeout) as response:
             content_type = response.headers.get_content_type()
             if content_type not in HTML_CONTENT_TYPES:
-                raise LoadError(f"{url} is not an HTML page ({content_type})")
+                raise LoadError("load.not_html", url=url, content_type=content_type)
             data = response.read(max_bytes + 1)
             final_url = response.url
             declared = response.headers.get_content_charset()
     except HTTPError as error:  # must come before URLError, its parent class
-        raise LoadError(f"{url} answered with HTTP status {error.code}") from error
+        raise LoadError("load.http_status", url=url, status=error.code) from error
     except URLError as error:
-        raise LoadError(f"cannot reach {url}: {error.reason}") from error
+        raise LoadError("load.unreachable", url=url, reason=error.reason) from error
     except TimeoutError as error:
-        raise LoadError(f"{url} did not answer within {timeout} s") from error
+        raise LoadError("load.timeout", url=url, timeout=timeout) from error
     return _decode(final_url, data, max_bytes, declared)
