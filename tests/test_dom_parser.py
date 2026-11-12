@@ -85,3 +85,8 @@ def test_keeps_script_content_as_hidden_text() -> None:
 
 def test_flushes_buffered_text_at_the_end() -> None:
     assert parse_html("Tom &amp").root.text_content() == "Tom &"
+
+
+def test_keeps_the_page_url() -> None:
+    assert parse_html("<p>", url="https://example.com/").url == "https://example.com/"
+    assert parse_html("<p>").url is None

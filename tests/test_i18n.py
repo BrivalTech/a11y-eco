@@ -5,7 +5,7 @@ import pytest
 from a11y_eco.checks import RULES
 from a11y_eco.i18n import CATALOGS, Language, detect_language
 from a11y_eco.i18n.catalog import Catalog
-from a11y_eco.models import Severity
+from a11y_eco.models import ResourceType, Severity
 
 EN = CATALOGS[Language.EN]
 FR = CATALOGS[Language.FR]
@@ -14,8 +14,6 @@ FR = CATALOGS[Language.FR]
 def placeholders(template: str) -> set[str]:
     """Return the names between braces in a template: "{count} errors" -> {"count"}."""
     names = set()
-    # parse() yields (literal text, field name, format spec, conversion) tuples;
-    # the field name is None for text without a placeholder.
     for _, name, _, _ in string.Formatter().parse(template):
         if name:
             names.add(name)
@@ -116,3 +114,10 @@ def test_unknown_rule_title_falls_back_to_its_identifier() -> None:
 )
 def test_detect_language(environ: dict[str, str], expected: Language) -> None:
     assert detect_language(environ) is expected
+
+
+@pytest.mark.parametrize("catalog", CATALOGS.values(), ids=lambda c: c.language)
+def test_every_resource_type_has_both_plural_forms(catalog: Catalog) -> None:
+    for kind in ResourceType:
+        assert f"resource.{kind}.one" in catalog.messages
+        assert f"resource.{kind}.other" in catalog.messages

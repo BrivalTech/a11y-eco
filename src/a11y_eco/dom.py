@@ -197,6 +197,8 @@ class Document:
     """A parsed HTML document."""
 
     root: Element = field(default_factory=lambda: Element("#document"))
+    url: str | None = None
+    """Address of the page when it was loaded from the web, like ``document.URL``."""
 
     @property
     def html(self) -> Element | None:
@@ -226,11 +228,12 @@ class Document:
         return next((e for e in self.root.iter() if e.get("id") == element_id), None)
 
 
-def parse_html(markup: str) -> Document:
+def parse_html(markup: str, *, url: str | None = None) -> Document:
     """Parse HTML source into a document.
 
     Args:
         markup: The HTML source, already decoded to text.
+        url: Address of the page, used to resolve relative links; None for a local file
 
     Returns:
         The parsed document.
@@ -238,6 +241,8 @@ def parse_html(markup: str) -> Document:
     builder = _TreeBuilder()
     builder.feed(markup)
     builder.close()
+    builder.document.url = url
+
     return builder.document
 
 

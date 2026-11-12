@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from a11y_eco.loader import LoadError, detect_encoding, load
+from a11y_eco.loader import LoadError, detect_encoding, is_url, load
 
 
 @pytest.mark.parametrize(
@@ -32,6 +32,21 @@ from a11y_eco.loader import LoadError, detect_encoding, load
 )
 def test_detect_encoding(data: bytes, declared: str | None, expected: str) -> None:
     assert detect_encoding(data, declared) == expected
+
+
+@pytest.mark.parametrize(
+    ("target", "expected"),
+    [
+        ("https://example.com", True),
+        ("HTTP://example.com/page", True),
+        ("page.html", False),
+        ("/home/me/page.html", False),
+        ("C:\\site\\page.html", False),
+        ("ftp://example.com/page.html", False),
+    ],
+)
+def test_is_url(target: str, expected: bool) -> None:
+    assert is_url(target) is expected
 
 
 def test_meta_charset_is_only_searched_at_the_start() -> None:

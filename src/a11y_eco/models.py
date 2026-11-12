@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from enum import StrEnum
 
 
@@ -51,6 +52,47 @@ class Finding:
     location: Location | None = None
     snippet: str = ""
     reference: str = ""
+    details: Mapping[str, int] = field(default_factory=dict, hash=False)
+    """Values that describe the problem, e.g. ``{"count": 52, "limit": 40}``."""
+
+
+class ResourceType(StrEnum):
+    """Kinds of downloaded resources."""
+
+    STYLESHEET = "stylesheet"
+    SCRIPT = "script"
+    IMAGE = "image"
+    FONT = "font"
+    MEDIA = "media"
+    FRAME = "frame"
+    OTHER = "other"
+
+
+@dataclass(frozen=True, slots=True)
+class Metrics:
+    """Sobriety measures of a page, read from its HTML only.
+
+    The HTML does not show what stylesheets and scripts download in turn: request
+    and resource counts are minimum values.
+    """
+
+    requests: int
+    """Requests made when the page loads, the HTML itself included."""
+
+    resources_by_type: Mapping[ResourceType, int] = field(default_factory=dict)
+    """Resources downloaded when the page loads, by type."""
+
+    deferred: int = 0
+    """Resources downloaded only on demand (lazy loading, ``preload="none"``)."""
+
+    external: int = 0
+    """Resources downloaded when the page loads from another host than the page."""
+
+    domains: int = 1
+    """Hosts that serve the page and the resources it downloads when it loads."""
+
+    dom_elements: int = 0
+    """Number of elements in the page."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,6 +107,9 @@ class Report:
 
     findings: tuple[Finding, ...]
     """Every problem found, in rule order then document order."""
+
+    metrics: Metrics | None = None
+    """Sobriety measures, or None when they were not computed."""
 
     def count(self, severity: Severity) -> int:
         """Count the findings of exactly one severity.

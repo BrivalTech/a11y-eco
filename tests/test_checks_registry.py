@@ -1,7 +1,7 @@
 import re
 
 from a11y_eco.checks import RULES
-from a11y_eco.checks.base import rule
+from a11y_eco.checks.base import Violation, rule
 from a11y_eco.dom import Document, Element, parse_html
 from a11y_eco.models import Severity
 
@@ -32,3 +32,21 @@ def test_decorator_wraps_check_into_rule_that_builds_findings() -> None:
     assert [f.severity for f in findings] == [Severity.WARNING, Severity.WARNING]
     assert [f.snippet for f in findings] == ['<img src="a.png">', '<img src="b.png">']
     assert {f.reference for f in findings} == {"Test 1.1"}
+
+
+def test_eco_design_rules_are_never_errors() -> None:
+    eco_rules = [r for r in RULES if r.rule_id.startswith("ECO-")]
+
+    assert eco_rules
+    assert all(r.severity is not Severity.ERROR for r in eco_rules)
+
+
+def test_violation_carries_details_to_the_finding() -> None:
+    @rule("TEST-COUNT", severity=Severity.INFO, reference="Test")
+    def count_paragraphs(document: Document) -> list[Element | Violation]:
+        paragraphs = document.find_all("p")
+        return [Violation(document.root, {"count": len(paragraphs)}), *paragraphs]
+
+    findings = count_paragraphs.run(parse_html("<p>a</p><p>b</p>"))
+
+    assert [dict(f.details) for f in findings] == [{"count": 2}, {}, {}]

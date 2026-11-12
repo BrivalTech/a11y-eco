@@ -12,7 +12,7 @@ from collections.abc import Mapping
 from typing import TextIO
 
 from a11y_eco.i18n import Catalog
-from a11y_eco.models import Finding, Report, Severity
+from a11y_eco.models import Finding, Metrics, Report, ResourceType, Severity
 
 _SEVERITY_COLORS = {Severity.ERROR: "31", Severity.WARNING: "33", Severity.INFO: "36"}
 _BOLD = "1"
@@ -52,6 +52,8 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     size = catalog.number(report.page_size)
     title = catalog.text("report.title", location=report.location, size=size)
     lines = [_style(title, _BOLD, enabled=color), ""]
+    if report.metrics is not None:
+        lines.extend(_render_metrics(report.metrics, catalog, color=color))
     label_width = max(len(catalog.text(f"severity.{severity}")) for severity in Severity)
 
     for finding in report.findings:
@@ -69,6 +71,25 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _render_metrics(metrics: Metrics, catalog: Catalog, *, color: bool) -> list[str]:
+    number = catalog.number
+    resources = ", ".join(
+        catalog.count(f"resource.{kind}", metrics.resources_by_type[kind])
+        for kind in ResourceType
+        if metrics.resources_by_type.get(kind)
+    ) or catalog.text("metrics.none")
+    measures = [
+        catalog.text("metrics.requests", count=number(metrics.requests)),
+        catalog.text("metrics.resources", list=resources),
+        catalog.text("metrics.deferred", count=number(metrics.deferred)),
+        catalog.text("metrics.external", count=number(metrics.external)),
+        catalog.text("metrics.domains", count=number(metrics.domains)),
+        catalog.text("metrics.dom", count=number(metrics.dom_elements)),
+    ]
+    title = _style(catalog.text("metrics.title"), _BOLD, enabled=color)
+    return [title, *(f"  {measure}" for measure in measures), ""]
+
+
 def _render_finding(
     finding: Finding, page: str, catalog: Catalog, label_width: int, *, color: bool
 ) -> list[str]:
@@ -79,7 +100,7 @@ def _render_finding(
     references = ", ".join(part for part in (finding.rule_id, finding.reference) if part)
     lines = [
         f"{label}  {position}",
-        f"{indent}{catalog.rule_title(finding.rule_id)} [{references}]",
+        f"{indent}{_title(finding, catalog)} [{references}]",
     ]
 
     if finding.snippet:
@@ -87,6 +108,13 @@ def _render_finding(
     lines.append("")
 
     return lines
+
+
+def _title(finding: Finding, catalog: Catalog) -> str:
+    """Describe the problem, with its values written in the language of the catalog."""
+    values = {name: catalog.number(value) for name, value in finding.details.items()}
+
+    return catalog.rule_title(finding.rule_id, **values)
 
 
 def _shorten(snippet: str) -> str:

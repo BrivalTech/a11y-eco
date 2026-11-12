@@ -52,3 +52,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command-line options can no longer be abbreviated (`--fail` for `--fail-on`), so that
   adding an option never breaks existing scripts.
 - pre-commit hooks running Ruff and mypy before each commit, and the tests before each push.
+- - Inventory of the resources referenced by the HTML (stylesheets, scripts, images, fonts,
+  audio and video, embedded content), each address counted once, on-demand resources apart.
+- Sobriety measures in the report: requests when the page loads, resources by type,
+  resources loaded on demand or served by another host, domains, DOM elements
+  (minimum values, read from the HTML only).
+- Eco-design rules based on the RWEB (5th edition), never reported as errors:
+  `ECO-REQUESTS` (RWEB_0047), `ECO-STYLESHEETS` (RWEB_0035), `ECO-DOMAINS` (RWEB_0082),
+  `ECO-INLINE-CODE` (RWEB_0042), `ECO-MEDIA-AUTOLOAD` (RWEB_0106),
+  `ECO-LAZY-LOADING` (RWEB_0051), `ECO-EMBEDDED-DOCUMENT` (RWEB_0033), `ECO-GIF` (RWEB_0099),
+  `ECO-WEB-FONTS` (RWEB_0032), `ECO-CANVAS` (RWEB_0055).
+- Messages of findings can show values, such as a count and the recommended maximum.
+- Credits of the RWEB and limits of an automated audit in the README.

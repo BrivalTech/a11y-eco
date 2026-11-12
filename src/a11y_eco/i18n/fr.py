@@ -48,6 +48,28 @@ CATALOG = Catalog(
         "load.http_status": "{url} a répondu avec le code HTTP {status}",
         "load.unreachable": "impossible de joindre {url}\N{NO-BREAK SPACE}: {reason}",
         "load.timeout": "{url} n'a pas répondu en {timeout}\N{NO-BREAK SPACE}s",
+        "metrics.title": "Sobriété (valeurs minimales, d'après le seul HTML)",
+        "metrics.requests": "Requêtes au chargement\N{NO-BREAK SPACE}: au moins {count}",
+        "metrics.resources": "Ressources\N{NO-BREAK SPACE}: {list}",
+        "metrics.none": "aucune",
+        "metrics.deferred": "Chargées à la demande\N{NO-BREAK SPACE}: {count}",
+        "metrics.external": "Servies par un autre hôte\N{NO-BREAK SPACE}: {count}",
+        "metrics.domains": "Domaines\N{NO-BREAK SPACE}: {count}",
+        "metrics.dom": "Éléments du DOM\N{NO-BREAK SPACE}: {count}",
+        "resource.stylesheet.one": "{count} feuille de style",
+        "resource.stylesheet.other": "{count} feuilles de style",
+        "resource.script.one": "{count} script",
+        "resource.script.other": "{count} scripts",
+        "resource.image.one": "{count} image",
+        "resource.image.other": "{count} images",
+        "resource.font.one": "{count} police",
+        "resource.font.other": "{count} polices",
+        "resource.media.one": "{count} fichier audio ou vidéo",
+        "resource.media.other": "{count} fichiers audio ou vidéo",
+        "resource.frame.one": "{count} contenu intégré",
+        "resource.frame.other": "{count} contenus intégrés",
+        "resource.other.one": "{count} autre",
+        "resource.other.other": "{count} autres",
         "report.title": "Audit de {location} ({size} octets)",
         "report.clean": (
             "Aucun problème détecté par les vérifications automatiques. "
@@ -73,5 +95,36 @@ CATALOG = Catalog(
         "rule.A11Y-ARIA-LABELLEDBY": "aria-labelledby fait référence à un id inexistant",
         "rule.A11Y-LINK-NAME": "Lien sans intitulé",
         "rule.A11Y-BUTTON-NAME": "Bouton sans intitulé",
+        "rule.ECO-REQUESTS": (
+            "Au moins {count} requêtes au chargement "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-STYLESHEETS": (
+            "{count} feuilles de style (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-DOMAINS": (
+            "Ressources servies par {count} domaines "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-INLINE-CODE": (
+            "{count} blocs volumineux de CSS ou JavaScript dans la page "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-MEDIA-AUTOLOAD": "Audio ou vidéo téléchargé sans que l'utilisateur le demande",
+        "rule.ECO-LAZY-LOADING": (
+            "Image ou contenu intégré chargé même s'il n'est jamais affiché "
+            '(ajouter loading="lazy")'
+        ),
+        "rule.ECO-EMBEDDED-DOCUMENT": (
+            "Document affiché dans la page (proposer plutôt un lien vers le fichier)"
+        ),
+        "rule.ECO-GIF": "Image GIF, peut-être animée (une vidéo est bien plus légère)",
+        "rule.ECO-WEB-FONTS": (
+            "Au moins {count} polices téléchargées (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-CANVAS": (
+            "Canvas\N{NO-BREAK SPACE}: vérifier que du HTML et du CSS "
+            "ne pourraient pas le remplacer"
+        ),
     },
 )

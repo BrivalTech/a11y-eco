@@ -3,8 +3,8 @@ from textwrap import dedent
 
 import pytest
 
-from a11y_eco.i18n import CATALOGS, Language
-from a11y_eco.models import Finding, Location, Report, Severity
+from a11y_eco.i18n import CATALOGS, Catalog, Language
+from a11y_eco.models import Finding, Location, Metrics, Report, ResourceType, Severity
 from a11y_eco.reporters.console import render, should_use_color
 
 EN = CATALOGS[Language.EN]
@@ -34,6 +34,42 @@ def test_renders_findings_with_position_title_and_snippet() -> None:
     )
 
 
+def test_renders_the_sobriety_measures_before_the_findings() -> None:
+    metrics = Metrics(
+        requests=1234,
+        resources_by_type={ResourceType.SCRIPT: 2, ResourceType.STYLESHEET: 1},
+        deferred=3,
+        external=1,
+        domains=2,
+        dom_elements=812,
+    )
+    report = Report(location="page.html", page_size=10, findings=(), metrics=metrics)
+    lines = render(report, EN).splitlines()
+
+    assert lines[2:10] == [
+        "Sobriety (minimum values, read from the HTML only)",
+        "  Requests when the page loads: at least 1,234",
+        "  Resources: 1 stylesheet, 2 scripts",  # always in the same order
+        "  Loaded on demand: 3",
+        "  From another host: 1",
+        "  Domains: 2",
+        "  DOM elements: 812",
+        "",
+    ]
+
+
+def test_page_without_resources_says_none() -> None:
+    report = Report(location="p.html", page_size=10, findings=(), metrics=Metrics(requests=1))
+
+    assert "  Ressources\N{NO-BREAK SPACE}: aucune" in render(report, FR).splitlines()
+
+
+def test_report_without_measures_has_no_sobriety_section() -> None:
+    report = Report(location="page.html", page_size=10, findings=())
+
+    assert "Sobriety" not in render(report, EN)
+
+
 def test_renders_a_clean_report_without_claiming_full_compliance() -> None:
     report = Report(location="page.html", page_size=10, findings=())
     output = render(report, EN)
@@ -58,6 +94,30 @@ def test_long_snippet_is_put_on_one_line_and_shortened() -> None:
     assert snippet_line.strip().startswith('<img src="xxx')
     assert len(snippet_line.strip()) == 80
     assert snippet_line.endswith("…")
+
+
+@pytest.mark.parametrize(
+    ("catalog", "expected"),
+    [
+        (EN, "At least 1,234 requests when the page loads (recommended maximum: 40)"),
+        (
+            FR,
+            "Au moins 1\N{NARROW NO-BREAK SPACE}234 requêtes au chargement "
+            "(maximum recommandé\N{NO-BREAK SPACE}: 40)",
+        ),
+    ],
+    ids=["en", "fr"],
+)
+def test_title_shows_the_details_of_the_finding(catalog: Catalog, expected: str) -> None:
+    finding = Finding(
+        rule_id="ECO-REQUESTS",
+        severity=Severity.WARNING,
+        reference="RWEB_0047",
+        details={"count": 1234, "limit": 40},
+    )
+    report = Report(location="page.html", page_size=10, findings=(finding,))
+
+    assert f"{expected} [ECO-REQUESTS, RWEB_0047]" in render(report, catalog)
 
 
 def test_unknown_rule_falls_back_to_its_identifier() -> None:

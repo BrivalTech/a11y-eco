@@ -16,9 +16,9 @@ Audit d'**accessibilité** et d'**éco-conception** d'une page web, en ligne de 
   d'images manquantes, hiérarchie des titres incorrecte, langue de la page absente, liens et
   boutons sans nom accessible. Chaque règle renvoie au critère
   [RGAA](https://accessibilite.numerique.gouv.fr/) correspondant.
-- Fournir des indicateurs d'éco-conception : poids de la page, nombre de ressources et
-  vérifications inspirées des
-  [115 bonnes pratiques d'écoconception web](https://github.com/cnumr/best-practices).
+- Fournir des indicateurs d'éco-conception (requêtes, ressources, hôtes, taille du DOM) et
+  des vérifications fondées sur le RWEB, le référentiel d'écoconception web (« 115 bonnes
+  pratiques »).
 - Produire des rapports en console, en JSON (pour la CI et l'outillage) ou sous forme de page
   HTML autonome.
 - Fonctionner en français ou en anglais.
@@ -48,6 +48,32 @@ sinon dans la langue du système (`LANG`, `LC_ALL`…), et le français est util
 | `2`            | Arguments invalides, ou page impossible à charger                       |
 
 Les couleurs ne sont utilisées que dans un terminal interactif, et jamais quand `NO_COLOR` est définie.
+
+## Règles d'éco-conception et crédits
+
+Les règles d'éco-conception renvoient aux bonnes pratiques du **RWEB** (*Référentiel
+d'écoconception web*, 5ᵉ édition), par leur identifiant, par exemple `RWEB_0047`. Le RWEB
+est publié par GreenIT.fr dans le cadre des travaux du Collectif conception numérique
+responsable, selon les termes de la licence
+[Creative Commons BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.fr) :
+<https://collectif.greenit.fr> · <https://www.ecoconceptionweb.com> ·
+<https://rweb.greenit.fr>.
+
+a11y-eco ne reproduit pas le contenu du RWEB : les messages sont rédigés pour l'outil, et
+seuls les identifiants des bonnes pratiques et les seuils de leurs règles de validation
+sont utilisés.
+
+## Limites d'un audit automatique
+
+- Seul le HTML envoyé par le serveur est lu : aucun JavaScript n'est exécuté, et les
+  feuilles de style et les scripts ne sont pas téléchargés.
+- Les nombres de requêtes et de ressources sont donc des **valeurs minimales**. Une règle
+  d'éco-conception ne signale un problème que si ce minimum dépasse déjà le seuil de la
+  bonne pratique : une page qui la respecte n'est jamais signalée, mais certains problèmes
+  ne sont pas détectés.
+- La plupart des bonnes pratiques du RWEB portent sur la conception, les serveurs ou les
+  contenus, et ne peuvent pas être vérifiées à partir du HTML. Il en va de même pour la
+  plupart des critères du RGAA. Un audit automatique ne remplace jamais un audit manuel.
 
 ## Développement
 
