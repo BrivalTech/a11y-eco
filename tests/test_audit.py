@@ -1,5 +1,7 @@
 from a11y_eco.audit import audit
 from a11y_eco.checks import language
+from a11y_eco.checks.base import rule
+from a11y_eco.dom import Document, Element
 from a11y_eco.loader import Source
 from a11y_eco.models import Finding, Report, Severity
 
@@ -39,3 +41,18 @@ def test_report_counts_and_thresholds() -> None:
     assert report.reaches(Severity.WARNING)
     assert not report.reaches(Severity.ERROR)
     assert not Report(location="x", page_size=0, findings=()).reaches(Severity.INFO)
+
+
+def test_audit_gives_the_page_url_to_the_rules_only_for_web_pages() -> None:
+    seen: list[str | None] = []
+
+    @rule("TEST-URL", severity=Severity.INFO, reference="Test")
+    def record_url(document: Document) -> list[Element]:
+        seen.append(document.url)
+        return []
+
+    web = Source(location="https://example.com/", text="", size=0, encoding="utf-8")
+    audit(web, rules=[record_url])
+    audit(make_source(""), rules=[record_url])
+
+    assert seen == ["https://example.com/", None]

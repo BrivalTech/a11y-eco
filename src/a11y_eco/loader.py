@@ -71,9 +71,22 @@ def load(target: str, *, timeout: float = 10.0, max_bytes: int = MAX_BYTES) -> S
     Raises:
         LoadError: If the page cannot be read, is not HTML or is too large.
     """
-    if urlsplit(target).scheme in {"http", "https"}:
+    if is_url(target):
         return _load_url(target, timeout=timeout, max_bytes=max_bytes)
+
     return _load_file(Path(target), max_bytes=max_bytes)
+
+
+def is_url(target: str) -> bool:
+    """Tell whether a target is a web address (``http`` or ``https``) or a file path.
+
+    Args:
+        target: A URL or a file path.
+
+    Returns:
+        True for a URL.
+    """
+    return urlsplit(target).scheme in {"http", "https"}
 
 
 def detect_encoding(data: bytes, declared: str | None = None) -> str:
