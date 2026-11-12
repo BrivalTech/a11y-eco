@@ -3,7 +3,7 @@ from textwrap import dedent
 
 import pytest
 
-from a11y_eco.i18n import CATALOGS, Language
+from a11y_eco.i18n import CATALOGS, Catalog, Language
 from a11y_eco.models import Finding, Location, Metrics, Report, ResourceType, Severity
 from a11y_eco.reporters.console import render, should_use_color
 
@@ -94,6 +94,30 @@ def test_long_snippet_is_put_on_one_line_and_shortened() -> None:
     assert snippet_line.strip().startswith('<img src="xxx')
     assert len(snippet_line.strip()) == 80
     assert snippet_line.endswith("…")
+
+
+@pytest.mark.parametrize(
+    ("catalog", "expected"),
+    [
+        (EN, "At least 1,234 requests when the page loads (recommended maximum: 40)"),
+        (
+            FR,
+            "Au moins 1\N{NARROW NO-BREAK SPACE}234 requêtes au chargement "
+            "(maximum recommandé\N{NO-BREAK SPACE}: 40)",
+        ),
+    ],
+    ids=["en", "fr"],
+)
+def test_title_shows_the_details_of_the_finding(catalog: Catalog, expected: str) -> None:
+    finding = Finding(
+        rule_id="ECO-REQUESTS",
+        severity=Severity.WARNING,
+        reference="RWEB_0047",
+        details={"count": 1234, "limit": 40},
+    )
+    report = Report(location="page.html", page_size=10, findings=(finding,))
+
+    assert f"{expected} [ECO-REQUESTS, RWEB_0047]" in render(report, catalog)
 
 
 def test_unknown_rule_falls_back_to_its_identifier() -> None:

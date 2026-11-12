@@ -95,5 +95,20 @@ CATALOG = Catalog(
         "rule.A11Y-ARIA-LABELLEDBY": "aria-labelledby fait référence à un id inexistant",
         "rule.A11Y-LINK-NAME": "Lien sans intitulé",
         "rule.A11Y-BUTTON-NAME": "Bouton sans intitulé",
+        "rule.ECO-REQUESTS": (
+            "Au moins {count} requêtes au chargement "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-STYLESHEETS": (
+            "{count} feuilles de style (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-DOMAINS": (
+            "Ressources servies par {count} domaines "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-INLINE-CODE": (
+            "{count} blocs volumineux de CSS ou JavaScript dans la page "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
     },
 )

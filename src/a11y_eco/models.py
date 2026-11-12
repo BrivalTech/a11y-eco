@@ -52,6 +52,8 @@ class Finding:
     location: Location | None = None
     snippet: str = ""
     reference: str = ""
+    details: Mapping[str, int] = field(default_factory=dict, hash=False)
+    """Values that describe the problem, e.g. ``{"count": 52, "limit": 40}``."""
 
 
 class ResourceType(StrEnum):

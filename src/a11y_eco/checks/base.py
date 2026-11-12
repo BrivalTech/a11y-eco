@@ -2,13 +2,22 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
+from typing import NamedTuple
 
 from a11y_eco.dom import Document, Element
 from a11y_eco.models import Finding, Severity
 
-CheckFunction = Callable[[Document], Iterable[Element]]
+
+class Violation(NamedTuple):
+    """An element that breaks a rule, with values that describe the problem."""
+
+    element: Element
+    details: Mapping[str, int]
+
+
+CheckFunction = Callable[[Document], Iterable[Element | Violation]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,16 +43,21 @@ class Rule:
         Returns:
             The findings, in document order.
         """
-        return [
-            Finding(
-                rule_id=self.rule_id,
-                severity=self.severity,
-                location=element.location,
-                snippet=element.start_tag,
-                reference=self.reference,
+        findings = []
+        for result in self.check(document):
+            violation = result if isinstance(result, Violation) else Violation(result, {})
+            findings.append(
+                Finding(
+                    rule_id=self.rule_id,
+                    severity=self.severity,
+                    location=violation.element.location,
+                    snippet=violation.element.start_tag,
+                    reference=self.reference,
+                    details=violation.details,
+                )
             )
-            for element in self.check(document)
-        ]
+
+        return findings
 
 
 def rule(rule_id: str, *, severity: Severity, reference: str) -> Callable[[CheckFunction], Rule]:

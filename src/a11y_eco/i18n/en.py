@@ -83,5 +83,13 @@ CATALOG = Catalog(
         "rule.A11Y-ARIA-LABELLEDBY": "aria-labelledby refers to an id that does not exist",
         "rule.A11Y-LINK-NAME": "Link without an accessible name",
         "rule.A11Y-BUTTON-NAME": "Button without an accessible name",
+        "rule.ECO-REQUESTS": (
+            "At least {count} requests when the page loads (recommended maximum: {limit})"
+        ),
+        "rule.ECO-STYLESHEETS": "{count} stylesheets (recommended maximum: {limit})",
+        "rule.ECO-DOMAINS": "Resources served by {count} domains (recommended maximum: {limit})",
+        "rule.ECO-INLINE-CODE": (
+            "{count} large blocks of CSS or JavaScript in the page (recommended maximum: {limit})"
+        ),
     },
 )

@@ -65,13 +65,16 @@ class Catalog:
         """
         return f"{value:,}".replace(",", self.thousands_separator)
 
-    def rule_title(self, rule_id: str) -> str:
+    def rule_title(self, rule_id: str, /, **params: object) -> str:
         """Return the description of a rule, or its identifier if there is none.
 
         Args:
             rule_id: Identifier of the rule.
+            **params: Values of the placeholders of the description.
 
         Returns:
             A human-readable sentence.
         """
-        return self.messages.get(f"rule.{rule_id}", rule_id)
+        key = f"rule.{rule_id}"
+
+        return self.text(key, **params) if key in self.messages else rule_id

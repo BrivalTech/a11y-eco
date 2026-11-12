@@ -100,7 +100,7 @@ def _render_finding(
     references = ", ".join(part for part in (finding.rule_id, finding.reference) if part)
     lines = [
         f"{label}  {position}",
-        f"{indent}{catalog.rule_title(finding.rule_id)} [{references}]",
+        f"{indent}{_title(finding, catalog)} [{references}]",
     ]
 
     if finding.snippet:
@@ -108,6 +108,13 @@ def _render_finding(
     lines.append("")
 
     return lines
+
+
+def _title(finding: Finding, catalog: Catalog) -> str:
+    """Describe the problem, with its values written in the language of the catalog."""
+    values = {name: catalog.number(value) for name, value in finding.details.items()}
+
+    return catalog.rule_title(finding.rule_id, **values)
 
 
 def _shorten(snippet: str) -> str:

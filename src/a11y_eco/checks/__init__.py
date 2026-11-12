@@ -4,7 +4,7 @@ Each module groups the rules of one theme. A new rule is declared with the
 ``@rule`` decorator in its module, then added to ``RULES`` below.
 """
 
-from a11y_eco.checks import headings, images, language, names
+from a11y_eco.checks import headings, images, language, names, sobriety
 from a11y_eco.checks.base import Rule
 
 RULES: tuple[Rule, ...] = (
@@ -18,6 +18,10 @@ RULES: tuple[Rule, ...] = (
     names.broken_labelledby_reference,
     names.link_without_name,
     names.button_without_name,
+    sobriety.too_many_requests,
+    sobriety.too_many_stylesheets,
+    sobriety.too_many_domains,
+    sobriety.too_much_inline_code,
 )
 
 __all__ = ["RULES", "Rule"]
