@@ -9,23 +9,13 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from enum import StrEnum
 from typing import NamedTuple
 from urllib.parse import urljoin, urlsplit
 
 from a11y_eco.dom import Document, Element
+from a11y_eco.models import ResourceType
 
-
-class ResourceType(StrEnum):
-    """Kinds of downloaded resources."""
-
-    STYLESHEET = "stylesheet"
-    SCRIPT = "script"
-    IMAGE = "image"
-    FONT = "font"
-    MEDIA = "media"
-    FRAME = "frame"
-    OTHER = "other"
+__all__ = ["Resource", "ResourceType", "find_resources", "is_external"]
 
 
 @dataclass(frozen=True, slots=True)

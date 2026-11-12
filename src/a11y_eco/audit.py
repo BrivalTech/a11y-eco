@@ -7,6 +7,7 @@ from collections.abc import Iterable
 from a11y_eco.checks import RULES, Rule
 from a11y_eco.dom import parse_html
 from a11y_eco.loader import Source, is_url
+from a11y_eco.metrics import measure
 from a11y_eco.models import Report
 
 
@@ -24,4 +25,9 @@ def audit(source: Source, rules: Iterable[Rule] = RULES) -> Report:
     document = parse_html(source.text, url=url)
     findings = tuple(finding for rule in rules for finding in rule.run(document))
 
-    return Report(location=source.location, page_size=source.size, findings=findings)
+    return Report(
+        location=source.location,
+        page_size=source.size,
+        findings=findings,
+        metrics=measure(document),
+    )

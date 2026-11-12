@@ -4,7 +4,7 @@ from textwrap import dedent
 import pytest
 
 from a11y_eco.i18n import CATALOGS, Language
-from a11y_eco.models import Finding, Location, Report, Severity
+from a11y_eco.models import Finding, Location, Metrics, Report, ResourceType, Severity
 from a11y_eco.reporters.console import render, should_use_color
 
 EN = CATALOGS[Language.EN]
@@ -32,6 +32,42 @@ def test_renders_findings_with_position_title_and_snippet() -> None:
         Summary: 1 error, 0 warnings, 0 info
         """
     )
+
+
+def test_renders_the_sobriety_measures_before_the_findings() -> None:
+    metrics = Metrics(
+        requests=1234,
+        resources_by_type={ResourceType.SCRIPT: 2, ResourceType.STYLESHEET: 1},
+        deferred=3,
+        external=1,
+        domains=2,
+        dom_elements=812,
+    )
+    report = Report(location="page.html", page_size=10, findings=(), metrics=metrics)
+    lines = render(report, EN).splitlines()
+
+    assert lines[2:10] == [
+        "Sobriety (minimum values, read from the HTML only)",
+        "  Requests when the page loads: at least 1,234",
+        "  Resources: 1 stylesheet, 2 scripts",  # always in the same order
+        "  Loaded on demand: 3",
+        "  From another host: 1",
+        "  Domains: 2",
+        "  DOM elements: 812",
+        "",
+    ]
+
+
+def test_page_without_resources_says_none() -> None:
+    report = Report(location="p.html", page_size=10, findings=(), metrics=Metrics(requests=1))
+
+    assert "  Ressources\N{NO-BREAK SPACE}: aucune" in render(report, FR).splitlines()
+
+
+def test_report_without_measures_has_no_sobriety_section() -> None:
+    report = Report(location="page.html", page_size=10, findings=())
+
+    assert "Sobriety" not in render(report, EN)
 
 
 def test_renders_a_clean_report_without_claiming_full_compliance() -> None:

@@ -56,3 +56,10 @@ def test_audit_gives_the_page_url_to_the_rules_only_for_web_pages() -> None:
     audit(make_source(""), rules=[record_url])
 
     assert seen == ["https://example.com/", None]
+
+
+def test_audit_measures_the_sobriety_of_the_page() -> None:
+    report = audit(make_source('<link rel="stylesheet" href="a.css"><p>Text</p>'), rules=[])
+
+    assert report.metrics is not None
+    assert report.metrics.requests == 2
