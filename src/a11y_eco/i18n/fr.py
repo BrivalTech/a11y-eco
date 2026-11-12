@@ -110,5 +110,21 @@ CATALOG = Catalog(
             "{count} blocs volumineux de CSS ou JavaScript dans la page "
             "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
         ),
+        "rule.ECO-MEDIA-AUTOLOAD": "Audio ou vidéo téléchargé sans que l'utilisateur le demande",
+        "rule.ECO-LAZY-LOADING": (
+            "Image ou contenu intégré chargé même s'il n'est jamais affiché "
+            '(ajouter loading="lazy")'
+        ),
+        "rule.ECO-EMBEDDED-DOCUMENT": (
+            "Document affiché dans la page (proposer plutôt un lien vers le fichier)"
+        ),
+        "rule.ECO-GIF": "Image GIF, peut-être animée (une vidéo est bien plus légère)",
+        "rule.ECO-WEB-FONTS": (
+            "Au moins {count} polices téléchargées (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-CANVAS": (
+            "Canvas\N{NO-BREAK SPACE}: vérifier que du HTML et du CSS "
+            "ne pourraient pas le remplacer"
+        ),
     },
 )

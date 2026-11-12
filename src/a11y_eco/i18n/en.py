@@ -91,5 +91,13 @@ CATALOG = Catalog(
         "rule.ECO-INLINE-CODE": (
             "{count} large blocks of CSS or JavaScript in the page (recommended maximum: {limit})"
         ),
+        "rule.ECO-MEDIA-AUTOLOAD": "Audio or video downloaded before the user asks for it",
+        "rule.ECO-LAZY-LOADING": (
+            'Image or embedded content loaded even if never displayed (add loading="lazy")'
+        ),
+        "rule.ECO-EMBEDDED-DOCUMENT": "Document displayed inside the page (offer a link instead)",
+        "rule.ECO-GIF": "GIF image, possibly animated (a video is much lighter)",
+        "rule.ECO-WEB-FONTS": "At least {count} downloaded fonts (recommended maximum: {limit})",
+        "rule.ECO-CANVAS": "Canvas: check that HTML and CSS could not replace it",
     },
 )
