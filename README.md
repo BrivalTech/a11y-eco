@@ -67,6 +67,8 @@ and only the identifiers of the practices and the limits of their validation rul
   respects a practice is never reported, but some problems are not detected.
 - Most RWEB practices concern design, servers or content, and cannot be checked from the
   HTML. The same goes for most RGAA criteria. An automated audit never replaces a manual one.
+- Third-party tools (analytics, social buttons, carousels, animation libraries) are
+  recognised from a list of known tools: a tool missing from the list is not detected.
 
 ## Development
 
