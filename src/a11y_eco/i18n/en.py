@@ -102,5 +102,10 @@ CATALOG = Catalog(
         "rule.ECO-VIEWPORT": "No viewport meta tag: the page may not be designed for mobile",
         "rule.ECO-TITLE": "The page has no title, or an empty one",
         "rule.ECO-META-DESCRIPTION": "The page has no meta description, or an empty one",
+        "rule.ECO-ANALYTICS": (
+            "Analytics tool, one of {count} on the page (recommended maximum: {limit})"
+        ),
+        "rule.ECO-SOCIAL-BUTTONS": "Official social media script (plain share links are enough)",
+        "rule.ECO-CAROUSEL": "Carousel, one of {count} on the page (recommended maximum: {limit})",
     },
 )

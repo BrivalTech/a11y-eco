@@ -132,5 +132,15 @@ CATALOG = Catalog(
         ),
         "rule.ECO-TITLE": "La page n'a pas de titre, ou un titre vide",
         "rule.ECO-META-DESCRIPTION": "La page n'a pas de meta description, ou une description vide",
+        "rule.ECO-ANALYTICS": (
+            "Outil de mesure d'audience, l'un des {count} de la page "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-SOCIAL-BUTTONS": (
+            "Script officiel de réseau social (de simples liens de partage suffisent)"
+        ),
+        "rule.ECO-CAROUSEL": (
+            "Carrousel, l'un des {count} de la page (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
     },
 )
