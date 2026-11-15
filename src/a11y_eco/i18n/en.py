@@ -99,5 +99,8 @@ CATALOG = Catalog(
         "rule.ECO-GIF": "GIF image, possibly animated (a video is much lighter)",
         "rule.ECO-WEB-FONTS": "At least {count} downloaded fonts (recommended maximum: {limit})",
         "rule.ECO-CANVAS": "Canvas: check that HTML and CSS could not replace it",
+        "rule.ECO-VIEWPORT": "No viewport meta tag: the page may not be designed for mobile",
+        "rule.ECO-TITLE": "The page has no title, or an empty one",
+        "rule.ECO-META-DESCRIPTION": "The page has no meta description, or an empty one",
     },
 )

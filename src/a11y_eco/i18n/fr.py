@@ -126,5 +126,11 @@ CATALOG = Catalog(
             "Canvas\N{NO-BREAK SPACE}: vérifier que du HTML et du CSS "
             "ne pourraient pas le remplacer"
         ),
+        "rule.ECO-VIEWPORT": (
+            "Pas de balise meta viewport\N{NO-BREAK SPACE}: la page n'est peut-être pas "
+            "conçue pour le mobile"
+        ),
+        "rule.ECO-TITLE": "La page n'a pas de titre, ou un titre vide",
+        "rule.ECO-META-DESCRIPTION": "La page n'a pas de meta description, ou une description vide",
     },
 )
