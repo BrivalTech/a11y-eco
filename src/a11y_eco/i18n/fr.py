@@ -142,5 +142,12 @@ CATALOG = Catalog(
         "rule.ECO-CAROUSEL": (
             "Carrousel, l'un des {count} de la page (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
         ),
+        "rule.ECO-ANIMATIONS": (
+            "Animation, l'une des {count} de la page "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-SVG-METADATA": (
+            "Image SVG contenant encore les métadonnées de son logiciel de dessin"
+        ),
     },
 )

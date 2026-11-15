@@ -104,3 +104,10 @@ def test_deep_nesting_does_not_hit_recursion_limit() -> None:
     assert sum(1 for _ in root.iter()) == 10_000
     assert root.text_content() == "deep"
     assert repr(root)  # parent/children are excluded from repr: no infinite loop
+
+
+def test_ancestors_go_up_to_the_root(document: Document) -> None:
+    em = document.find_all("em")[0]
+
+    assert [a.tag for a in em.ancestors()] == ["h1", "body", "html", "#document"]
+    assert list(document.root.ancestors()) == []

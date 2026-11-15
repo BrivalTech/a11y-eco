@@ -20,14 +20,7 @@ def _meta_content(document: Document, name: str) -> str:
 
 def _in_svg(element: Element) -> bool:
     """Tell whether an element is part of an SVG image (an SVG <title> is not the page's)."""
-    node = element.parent
-
-    while node is not None:
-        if node.tag == "svg":
-            return True
-        node = node.parent
-
-    return False
+    return any(ancestor.tag == "svg" for ancestor in element.ancestors())
 
 
 @rule("ECO-VIEWPORT", severity=Severity.INFO, reference="RWEB_0004")

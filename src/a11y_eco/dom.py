@@ -150,6 +150,18 @@ class Element:
                 yield node
                 stack.extend(reversed(node.children))
 
+    def ancestors(self) -> Iterator[Element]:
+        """Yield the parent, then its parent, and so on up to the document root.
+
+        Yields:
+            The ancestors of this element, the closest first.
+        """
+        node = self.parent
+
+        while node is not None:
+            yield node
+            node = node.parent
+
     def find_all(self, *tags: str) -> list[Element]:
         """Return the descendant elements with one of the given tags.
 

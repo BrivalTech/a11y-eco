@@ -107,5 +107,9 @@ CATALOG = Catalog(
         ),
         "rule.ECO-SOCIAL-BUTTONS": "Official social media script (plain share links are enough)",
         "rule.ECO-CAROUSEL": "Carousel, one of {count} on the page (recommended maximum: {limit})",
+        "rule.ECO-ANIMATIONS": (
+            "Animation, one of {count} on the page (recommended maximum: {limit})"
+        ),
+        "rule.ECO-SVG-METADATA": "SVG image still holding metadata from its drawing tool",
     },
 )

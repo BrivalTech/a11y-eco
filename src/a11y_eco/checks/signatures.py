@@ -26,6 +26,9 @@ class Signature:
     classes: frozenset[str] = frozenset()
     """CSS classes found on the root element of the tool's markup, e.g. ``swiper``."""
 
+    tags: frozenset[str] = frozenset()
+    """Lowercase names of elements that only this tool uses, e.g. ``lottie-player``."""
+
     _regex: re.Pattern[str] | None = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -41,8 +44,11 @@ class Signature:
             searchable: Its addresses and inline code, as built by ``find_tools``.
 
         Returns:
-            True if a pattern or a class matches.
+            True if a tag, a class or a pattern matches.
         """
+        if element.tag in self.tags:
+            return True
+
         if self.classes and self.classes & set((element.get("class") or "").split()):
             return True
 
@@ -82,6 +88,13 @@ CAROUSELS: tuple[Signature, ...] = (
     Signature("Flickity", classes=frozenset({"js-flickity", "flickity-enabled"})),
     Signature("Keen Slider", classes=frozenset({"keen-slider"})),
     Signature("Embla", classes=frozenset({"embla"})),
+)
+ANIMATIONS: tuple[Signature, ...] = (
+    Signature("Marquee", tags=frozenset({"marquee"})),
+    Signature("Lottie", tags=frozenset({"lottie-player", "dotlottie-player"})),
+    Signature("Animate.css", classes=frozenset({"animate__animated"})),
+    # SVG animations (SMIL) play on their own, without any script.
+    Signature("SVG animation", tags=frozenset({"animate", "animatetransform", "animatemotion"})),
 )
 _ADDRESS_ATTRIBUTES = ("src", "href", "data")
 

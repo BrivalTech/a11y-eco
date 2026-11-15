@@ -2,6 +2,7 @@ import pytest
 
 from a11y_eco.checks.signatures import (
     ANALYTICS,
+    ANIMATIONS,
     CAROUSELS,
     SOCIAL_BUTTONS,
     Signature,
@@ -10,7 +11,12 @@ from a11y_eco.checks.signatures import (
 )
 from a11y_eco.dom import parse_html
 
-ALL_LISTS = {"analytics": ANALYTICS, "social": SOCIAL_BUTTONS, "carousels": CAROUSELS}
+ALL_LISTS = {
+    "analytics": ANALYTICS,
+    "social": SOCIAL_BUTTONS,
+    "carousels": CAROUSELS,
+    "animations": ANIMATIONS,
+}
 HOTJAR = Signature("Hotjar", (r"static\.hotjar\.com/",))
 SWIPER = Signature("Swiper", classes=frozenset({"swiper"}))
 
@@ -21,7 +27,9 @@ def tags(markup: str, signatures: tuple[Signature, ...]) -> list[str]:
 
 @pytest.mark.parametrize("signatures", ALL_LISTS.values(), ids=ALL_LISTS.keys())
 def test_every_signature_can_match_something(signatures: tuple[Signature, ...]) -> None:
-    assert all(signature.patterns or signature.classes for signature in signatures)
+    assert all(
+        signature.patterns or signature.classes or signature.tags for signature in signatures
+    )
 
 
 @pytest.mark.parametrize("signatures", ALL_LISTS.values(), ids=ALL_LISTS.keys())
@@ -56,6 +64,15 @@ def test_patterns_are_searched_in_addresses_and_inline_scripts(markup: str, foun
 )
 def test_classes_are_matched_as_whole_tokens(markup: str, found: bool) -> None:
     assert bool(tags(markup, (SWIPER,))) is found
+
+
+def test_tags_are_matched_by_element_name() -> None:
+    lottie = Signature("Lottie", tags=frozenset({"lottie-player"}))
+
+    assert tags('<lottie-player src="a.json"></lottie-player>', (lottie,)) == [
+        '<lottie-player src="a.json">'
+    ]
+    assert tags('<div class="lottie-player"></div>', (lottie,)) == []
 
 
 def test_find_tools_reports_each_tool_once_with_its_first_element() -> None:
