@@ -64,3 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ECO-WEB-FONTS` (RWEB_0032), `ECO-CANVAS` (RWEB_0055).
 - Messages of findings can show values, such as a count and the recommended maximum.
 - Credits of the RWEB and limits of an automated audit in the README.
+- - Rules on the head of the page: `ECO-VIEWPORT` (RWEB_0004), `ECO-TITLE` and
+  `ECO-META-DESCRIPTION` (RWEB_0011).
+- Known tools recognised by signatures (loaded addresses, inline scripts, CSS classes,
+  element names), kept in lists that can grow without changing any rule.
+- Rules on third-party tools and visuals: `ECO-ANALYTICS` (RWEB_0111),
+  `ECO-SOCIAL-BUTTONS` (RWEB_0059), `ECO-CAROUSEL` (RWEB_0010), `ECO-ANIMATIONS`
+  (RWEB_0009), `ECO-SVG-METADATA` (RWEB_0100).

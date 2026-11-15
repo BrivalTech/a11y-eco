@@ -74,6 +74,9 @@ sont utilisés.
 - La plupart des bonnes pratiques du RWEB portent sur la conception, les serveurs ou les
   contenus, et ne peuvent pas être vérifiées à partir du HTML. Il en va de même pour la
   plupart des critères du RGAA. Un audit automatique ne remplace jamais un audit manuel.
+- Les outils tiers (mesure d'audience, boutons sociaux, carrousels, bibliothèques
+  d'animation) sont reconnus d'après une liste d'outils connus : un outil absent de la
+  liste n'est pas détecté.
 
 ## Développement
 

@@ -7,6 +7,14 @@ import pytest
 from a11y_eco import __version__
 from a11y_eco.cli import PROG, ExitCode, main
 
+HEAD = (
+    "<head>"
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    "<title>Page</title>"
+    '<meta name="description" content="A test page">'
+    "</head>"
+)
+
 
 def test_version_flag_prints_version_and_exits_ok(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc_info:
@@ -62,7 +70,9 @@ def page_without_lang(tmp_path: Path) -> str:
 @pytest.fixture
 def clean_page(tmp_path: Path) -> str:
     page = tmp_path / "clean.html"
-    page.write_text('<!DOCTYPE html>\n<html lang="fr"><h1>Bonjour</h1></html>', encoding="utf-8")
+    page.write_text(
+        f'<!DOCTYPE html>\n<html lang="fr">{HEAD}<h1>Bonjour</h1></html>', encoding="utf-8"
+    )
 
     return str(page)
 

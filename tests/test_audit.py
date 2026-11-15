@@ -5,6 +5,14 @@ from a11y_eco.dom import Document, Element
 from a11y_eco.loader import Source
 from a11y_eco.models import Finding, Report, Severity
 
+HEAD = (
+    "<head>"
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    "<title>Page</title>"
+    '<meta name="description" content="A test page">'
+    "</head>"
+)
+
 
 def make_source(html: str) -> Source:
     return Source(location="page.html", text=html, size=len(html.encode()), encoding="utf-8")
@@ -19,7 +27,7 @@ def test_audit_runs_the_given_rules_and_reports_page_details() -> None:
 
 
 def test_audit_uses_every_rule_by_default() -> None:
-    report = audit(make_source('<html lang="french"><img src="logo.png">'))
+    report = audit(make_source(f'<html lang="french">{HEAD}<img src="logo.png">'))
 
     assert [f.rule_id for f in report.findings] == [
         "A11Y-LANG-INVALID",
