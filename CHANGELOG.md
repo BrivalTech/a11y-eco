@@ -71,3 +71,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rules on third-party tools and visuals: `ECO-ANALYTICS` (RWEB_0111),
   `ECO-SOCIAL-BUTTONS` (RWEB_0059), `ECO-CAROUSEL` (RWEB_0010), `ECO-ANIMATIONS`
   (RWEB_0009), `ECO-SVG-METADATA` (RWEB_0100).
+- - `A11Y-PAGE-TITLE` (RGAA 8.5): page without a title, or with an empty one, as an error;
+  it shares its detection with `ECO-TITLE`.
+- `--fetch-resources`: downloads the page and the files it loads (at most 50, four at a
+  time, 10 MB each), announcing gzip and Brotli and counting the transferred bytes
+  without decompressing them. Same-host files only, unless `--include-external` is given.
+- "Network measures (real values)" section in the console report: requests, failed
+  downloads, transferred bytes ("at least" when files were skipped or cut short).
+- Network rules, run only with `--fetch-resources`: `ECO-COMPRESSION` (RWEB_0076),
+  `ECO-CACHE-HEADERS` (RWEB_0075), `ECO-COOKIE-DOMAINS` (RWEB_0081),
+  `ECO-REDIRECTS` (RWEB_0112).
