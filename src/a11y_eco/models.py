@@ -96,6 +96,64 @@ class Metrics:
 
 
 @dataclass(frozen=True, slots=True)
+class Download:
+    """What happened when downloading one address."""
+
+    url: str
+
+    status: int | None = None
+    """HTTP status of the final response, or None when no response was received."""
+
+    transferred: int = 0
+    """Bytes of the body as sent by the server, compressed or not."""
+
+    complete: bool = True
+    """False when the download was stopped at its size limit."""
+
+    redirected: bool = False
+    """True when the server answered with one or more redirections."""
+
+    headers: Mapping[str, str] = field(default_factory=dict, hash=False)
+    """Response headers, names in lowercase; a repeated header has one value per line."""
+
+    @property
+    def ok(self) -> bool:
+        """True when the file was received (status 2xx)."""
+        return self.status is not None and 200 <= self.status < 300
+
+
+@dataclass(frozen=True, slots=True)
+class NetworkMetrics:
+    """Sobriety measures taken by really downloading the page and its resources."""
+
+    downloads: tuple[Download, ...]
+    """Every download, the page first, in document order."""
+
+    skipped: int = 0
+    """Addresses not downloaded because of the download limit."""
+
+    @property
+    def requests(self) -> int:
+        """Number of downloads attempted."""
+        return len(self.downloads)
+
+    @property
+    def failed(self) -> int:
+        """Number of downloads that did not receive the file."""
+        return sum(1 for download in self.downloads if not download.ok)
+
+    @property
+    def transferred(self) -> int:
+        """Bytes received for the page and its resources, as sent by the servers."""
+        return sum(download.transferred for download in self.downloads)
+
+    @property
+    def complete(self) -> bool:
+        """False when ``transferred`` is only a minimum: files skipped or cut short."""
+        return self.skipped == 0 and all(download.complete for download in self.downloads)
+
+
+@dataclass(frozen=True, slots=True)
 class Report:
     """The result of an audit."""
 
@@ -109,7 +167,10 @@ class Report:
     """Every problem found, in rule order then document order."""
 
     metrics: Metrics | None = None
-    """Sobriety measures, or None when they were not computed."""
+    """Sobriety measures read from the HTML, or None when they were not computed."""
+
+    network: NetworkMetrics | None = None
+    """Sobriety measures taken on the network, or None without --fetch-resources."""
 
     def count(self, severity: Severity) -> int:
         """Count the findings of exactly one severity.

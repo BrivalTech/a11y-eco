@@ -2,21 +2,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 
 from a11y_eco.checks import RULES, Rule
-from a11y_eco.dom import parse_html
+from a11y_eco.dom import Document, parse_html
 from a11y_eco.loader import Source, is_url
 from a11y_eco.metrics import measure
-from a11y_eco.models import Report
+from a11y_eco.models import NetworkMetrics, Report
+
+Fetcher = Callable[[Document], NetworkMetrics]
 
 
-def audit(source: Source, rules: Iterable[Rule] = RULES) -> Report:
+def audit(source: Source, rules: Iterable[Rule] = RULES, *, fetch: Fetcher | None = None) -> Report:
     """Audit a loaded page.
 
     Args:
         source: The page to audit.
         rules: The rules to run. Defaults to every rule.
+        fetch: Takes network measures of the page; None to stay offline.
 
     Returns:
         The audit report.
@@ -30,4 +33,5 @@ def audit(source: Source, rules: Iterable[Rule] = RULES) -> Report:
         page_size=source.size,
         findings=findings,
         metrics=measure(document),
+        network=fetch(document) if fetch else None,
     )
