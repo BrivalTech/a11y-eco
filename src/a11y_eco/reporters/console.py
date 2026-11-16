@@ -12,7 +12,7 @@ from collections.abc import Mapping
 from typing import TextIO
 
 from a11y_eco.i18n import Catalog
-from a11y_eco.models import Finding, Metrics, Report, ResourceType, Severity
+from a11y_eco.models import Finding, Metrics, NetworkMetrics, Report, ResourceType, Severity
 
 _SEVERITY_COLORS = {Severity.ERROR: "31", Severity.WARNING: "33", Severity.INFO: "36"}
 _BOLD = "1"
@@ -52,8 +52,12 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     size = catalog.number(report.page_size)
     title = catalog.text("report.title", location=report.location, size=size)
     lines = [_style(title, _BOLD, enabled=color), ""]
+
     if report.metrics is not None:
         lines.extend(_render_metrics(report.metrics, catalog, color=color))
+    if report.network is not None:
+        lines.extend(_render_network(report.network, catalog, color=color))
+
     label_width = max(len(catalog.text(f"severity.{severity}")) for severity in Severity)
 
     for finding in report.findings:
@@ -62,6 +66,7 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     if not report.findings:
         lines.append(catalog.text("report.clean"))
         lines.append("")
+
     counts = ", ".join(
         catalog.count(f"count.{severity}", report.count(severity))
         for severity in reversed(Severity)
@@ -87,6 +92,22 @@ def _render_metrics(metrics: Metrics, catalog: Catalog, *, color: bool) -> list[
         catalog.text("metrics.dom", count=number(metrics.dom_elements)),
     ]
     title = _style(catalog.text("metrics.title"), _BOLD, enabled=color)
+
+    return [title, *(f"  {measure}" for measure in measures), ""]
+
+
+def _render_network(network: NetworkMetrics, catalog: Catalog, *, color: bool) -> list[str]:
+    number = catalog.number
+    transferred = "network.transferred" if network.complete else "network.transferred_minimum"
+    measures = [
+        catalog.text("network.requests", count=number(network.requests)),
+        catalog.text("network.failed", count=number(network.failed)),
+        catalog.text(transferred, size=number(network.transferred)),
+    ]
+    if network.skipped:
+        measures.append(catalog.text("network.skipped", count=number(network.skipped)))
+    title = _style(catalog.text("network.title"), _BOLD, enabled=color)
+
     return [title, *(f"  {measure}" for measure in measures), ""]
 
 

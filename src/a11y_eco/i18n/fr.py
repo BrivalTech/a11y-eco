@@ -56,6 +56,14 @@ CATALOG = Catalog(
         "metrics.external": "Servies par un autre hôte\N{NO-BREAK SPACE}: {count}",
         "metrics.domains": "Domaines\N{NO-BREAK SPACE}: {count}",
         "metrics.dom": "Éléments du DOM\N{NO-BREAK SPACE}: {count}",
+        "network.title": "Mesures réseau (valeurs réelles)",
+        "network.requests": "Requêtes\N{NO-BREAK SPACE}: {count}",
+        "network.failed": "Téléchargements en échec\N{NO-BREAK SPACE}: {count}",
+        "network.transferred": "Données transférées\N{NO-BREAK SPACE}: {size} octets",
+        "network.transferred_minimum": (
+            "Données transférées\N{NO-BREAK SPACE}: au moins {size} octets"
+        ),
+        "network.skipped": "Non téléchargées, limite atteinte\N{NO-BREAK SPACE}: {count}",
         "resource.stylesheet.one": "{count} feuille de style",
         "resource.stylesheet.other": "{count} feuilles de style",
         "resource.script.one": "{count} script",
