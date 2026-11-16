@@ -33,6 +33,8 @@ a11y-eco audit page.html                 # a local file
 a11y-eco audit https://example.com       # a web page
 a11y-eco audit page.html --fail-on warning
 a11y-eco audit page.html --lang en       # report in English
+a11y-eco audit https://example.com --fetch-resources                     # real network measures
+a11y-eco audit https://example.com --fetch-resources --include-external  # third parties too
 ```
 
 Reports are written in English or French. The language is taken from `--lang`,
@@ -45,6 +47,23 @@ otherwise from the system (`LANG`, `LC_ALL`…), and French is used by default.
 | `2`         | Invalid arguments, or the page could not be loaded             |
 
 Colours are used only in an interactive terminal, and never when `NO_COLOR` is set.
+
+### Network measures
+
+By default, only the HTML of the page is downloaded. With `--fetch-resources`, a11y-eco
+also downloads the page again and the files it loads, at most 50, four at a time, the way
+a browser asks for them: announcing gzip and Brotli, without decompressing anything, so
+that the counted bytes are the bytes really transferred. Nothing is executed.
+
+The report then gets a separate "Network measures (real values)" section, and four more
+rules check compression (`RWEB_0076`), cache headers (`RWEB_0075`), cookies on static
+files (`RWEB_0081`) and redirections (`RWEB_0112`).
+
+Files from other hosts (CDN, fonts, analytics, ads) are left out unless
+`--include-external` is added: downloading them shows your IP address to those third
+parties. A local file has no host, so its relative addresses cannot be downloaded and
+all its absolute addresses count as other hosts: with a local file,
+`--fetch-resources` measures nothing without `--include-external`.
 
 ## Eco-design rules and credits
 
@@ -60,8 +79,10 @@ and only the identifiers of the practices and the limits of their validation rul
 
 ## Limits of an automated audit
 
-- Only the HTML sent by the server is read: no JavaScript is run, and stylesheets and
-  scripts are not downloaded.
+- Only the HTML sent by the server is read: no JavaScript is run. Stylesheets and
+  scripts are downloaded only with `--fetch-resources`, and are never interpreted:
+  resources loaded by them (fonts declared in CSS, files requested by scripts) stay
+  invisible.
 - Request and resource counts are therefore **minimum values**. An eco-design rule reports
   a problem only when this minimum already exceeds the limit of the practice: a page that
   respects a practice is never reported, but some problems are not detected.
@@ -69,6 +90,8 @@ and only the identifiers of the practices and the limits of their validation rul
   HTML. The same goes for most RGAA criteria. An automated audit never replaces a manual one.
 - Third-party tools (analytics, social buttons, carousels, animation libraries) are
   recognised from a list of known tools: a tool missing from the list is not detected.
+- Network rules see the answers of the servers only: cookies set by JavaScript are not
+  detected, and a chain of redirections counts as one.
 
 ## Development
 

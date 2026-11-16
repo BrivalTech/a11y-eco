@@ -15,13 +15,15 @@ import argparse
 import sys
 from collections.abc import Callable, Sequence
 from enum import IntEnum
+from functools import partial
 from typing import Any, NoReturn
 
 from a11y_eco import __version__
-from a11y_eco.audit import audit
+from a11y_eco.audit import Fetcher, audit
 from a11y_eco.i18n import CATALOGS, Catalog, Language, detect_language
 from a11y_eco.loader import LoadError, load
 from a11y_eco.models import Severity
+from a11y_eco.network import MAX_DOWNLOADS, fetch_resources
 from a11y_eco.reporters.console import render, should_use_color
 
 PROG = "a11y-eco"
@@ -94,6 +96,14 @@ def build_parser(catalog: Catalog) -> argparse.ArgumentParser:
         metavar="SECONDS",
         help=text("cli.audit.timeout"),
     )
+    options.add_argument(
+        "--fetch-resources",
+        action="store_true",
+        help=text("cli.audit.fetch_resources", limit=MAX_DOWNLOADS),
+    )
+    options.add_argument(
+        "--include-external", action="store_true", help=text("cli.audit.include_external")
+    )
 
     return parser
 
@@ -112,7 +122,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser(catalog)
     args = parser.parse_args(arguments)
     if args.command == "audit":
-        return _run_audit(args.target, fail_on=args.fail_on, timeout=args.timeout, catalog=catalog)
+        if args.include_external and not args.fetch_resources:
+            parser.error(catalog.text("cli.external_needs_fetch"))
+        fetch: Fetcher | None = None
+        if args.fetch_resources:
+            fetch = partial(
+                fetch_resources, include_external=args.include_external, timeout=args.timeout
+            )
+        return _run_audit(
+            args.target, fail_on=args.fail_on, timeout=args.timeout, fetch=fetch, catalog=catalog
+        )
     parser.print_help()
 
     return ExitCode.OK
@@ -136,7 +155,9 @@ def _requested_language(arguments: Sequence[str]) -> Language:
     return detect_language()
 
 
-def _run_audit(target: str, *, fail_on: str, timeout: float, catalog: Catalog) -> ExitCode:
+def _run_audit(
+    target: str, *, fail_on: str, timeout: float, fetch: Fetcher | None, catalog: Catalog
+) -> ExitCode:
     try:
         source = load(target, timeout=timeout)
     except LoadError as error:
@@ -144,7 +165,7 @@ def _run_audit(target: str, *, fail_on: str, timeout: float, catalog: Catalog) -
         print(catalog.text("cli.error", prog=PROG, message=message), file=sys.stderr)
         return ExitCode.USAGE_ERROR
 
-    report = audit(source)
+    report = audit(source, fetch=fetch)
     sys.stdout.write(render(report, catalog, color=should_use_color(sys.stdout)))
 
     if fail_on != "never" and report.reaches(Severity(fail_on)):

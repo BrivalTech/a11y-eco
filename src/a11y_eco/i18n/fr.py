@@ -42,6 +42,15 @@ CATALOG = Catalog(
             "délai d'attente réseau pour une URL, en secondes "
             "(par défaut\N{NO-BREAK SPACE}: %(default)s)"
         ),
+        "cli.audit.fetch_resources": (
+            "télécharge aussi la page et les fichiers qu'elle charge, {limit} au plus, "
+            "pour mesurer ce qui transite réellement sur le réseau"
+        ),
+        "cli.audit.include_external": (
+            "avec --fetch-resources, télécharge aussi les fichiers des autres "
+            "hôtes\N{NO-BREAK SPACE}: ils verront votre adresse IP"
+        ),
+        "cli.external_needs_fetch": "--include-external ne fonctionne qu'avec --fetch-resources",
         "load.unreadable": "impossible de lire {path}\N{NO-BREAK SPACE}: {reason}",
         "load.too_large": "{location} dépasse la limite de {limit} octets",
         "load.not_html": "{url} n'est pas une page HTML ({content_type})",
@@ -56,6 +65,14 @@ CATALOG = Catalog(
         "metrics.external": "Servies par un autre hôte\N{NO-BREAK SPACE}: {count}",
         "metrics.domains": "Domaines\N{NO-BREAK SPACE}: {count}",
         "metrics.dom": "Éléments du DOM\N{NO-BREAK SPACE}: {count}",
+        "network.title": "Mesures réseau (valeurs réelles)",
+        "network.requests": "Requêtes\N{NO-BREAK SPACE}: {count}",
+        "network.failed": "Téléchargements en échec\N{NO-BREAK SPACE}: {count}",
+        "network.transferred": "Données transférées\N{NO-BREAK SPACE}: {size} octets",
+        "network.transferred_minimum": (
+            "Données transférées\N{NO-BREAK SPACE}: au moins {size} octets"
+        ),
+        "network.skipped": "Non téléchargées, limite atteinte\N{NO-BREAK SPACE}: {count}",
         "resource.stylesheet.one": "{count} feuille de style",
         "resource.stylesheet.other": "{count} feuilles de style",
         "resource.script.one": "{count} script",
@@ -87,6 +104,10 @@ CATALOG = Catalog(
         "count.info.other": "{count} infos",
         "rule.A11Y-LANG-MISSING": "La langue par défaut de la page n'est pas déclarée",
         "rule.A11Y-LANG-INVALID": "Le code de langue de la page n'est pas valide",
+        "rule.A11Y-PAGE-TITLE": (
+            "La page n'a pas de titre\N{NO-BREAK SPACE}: "
+            "les lecteurs d'écran ne peuvent pas l'annoncer"
+        ),
         "rule.A11Y-IMG-ALT": "Image sans alternative textuelle",
         "rule.A11Y-HEADING-H1-MISSING": "La page n'a pas de titre de niveau 1",
         "rule.A11Y-HEADING-H1-MULTIPLE": "La page a plusieurs titres de niveau 1",
@@ -130,7 +151,10 @@ CATALOG = Catalog(
             "Pas de balise meta viewport\N{NO-BREAK SPACE}: la page n'est peut-être pas "
             "conçue pour le mobile"
         ),
-        "rule.ECO-TITLE": "La page n'a pas de titre, ou un titre vide",
+        "rule.ECO-TITLE": (
+            "La page n'a pas de titre, ce qui la rend plus difficile à trouver "
+            "dans les résultats de recherche"
+        ),
         "rule.ECO-META-DESCRIPTION": "La page n'a pas de meta description, ou une description vide",
         "rule.ECO-ANALYTICS": (
             "Outil de mesure d'audience, l'un des {count} de la page "
@@ -148,6 +172,20 @@ CATALOG = Catalog(
         ),
         "rule.ECO-SVG-METADATA": (
             "Image SVG contenant encore les métadonnées de son logiciel de dessin"
+        ),
+        "rule.ECO-COMPRESSION": (
+            "Fichier texte envoyé sans compression (gzip ou Brotli l'allégerait)"
+        ),
+        "rule.ECO-CACHE-HEADERS": (
+            "Ni Expires ni Cache-Control\N{NO-BREAK SPACE}: le navigateur ne sait pas "
+            "combien de temps le garder"
+        ),
+        "rule.ECO-COOKIE-DOMAINS": (
+            "Fichiers statiques servis avec des cookies par {count} domaines "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-REDIRECTS": (
+            "Redirection, l'une des {count} (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
         ),
     },
 )

@@ -4,7 +4,16 @@ from textwrap import dedent
 import pytest
 
 from a11y_eco.i18n import CATALOGS, Catalog, Language
-from a11y_eco.models import Finding, Location, Metrics, Report, ResourceType, Severity
+from a11y_eco.models import (
+    Download,
+    Finding,
+    Location,
+    Metrics,
+    NetworkMetrics,
+    Report,
+    ResourceType,
+    Severity,
+)
 from a11y_eco.reporters.console import render, should_use_color
 
 EN = CATALOGS[Language.EN]
@@ -68,6 +77,48 @@ def test_report_without_measures_has_no_sobriety_section() -> None:
     report = Report(location="page.html", page_size=10, findings=())
 
     assert "Sobriety" not in render(report, EN)
+
+
+def test_renders_the_network_measures_after_the_html_ones() -> None:
+    network = NetworkMetrics(
+        downloads=(
+            Download("https://www.example.com/", status=200, transferred=10_240),
+            Download("https://www.example.com/a.css", status=404, transferred=512),
+        )
+    )
+    report = Report(
+        location="https://www.example.com/",
+        page_size=10,
+        findings=(),
+        metrics=Metrics(requests=2),
+        network=network,
+    )
+
+    lines = render(report, FR).splitlines()
+    start = lines.index("Mesures réseau (valeurs réelles)")
+
+    assert lines[start - 1] == ""  # after the section of the HTML measures
+    assert lines[start + 1 : start + 5] == [
+        "  Requêtes\N{NO-BREAK SPACE}: 2",
+        "  Téléchargements en échec\N{NO-BREAK SPACE}: 1",
+        "  Données transférées\N{NO-BREAK SPACE}: 10\N{NARROW NO-BREAK SPACE}752 octets",
+        "",
+    ]
+
+
+def test_network_transfer_is_a_minimum_when_files_were_skipped() -> None:
+    network = NetworkMetrics(downloads=(Download("u", status=200, transferred=100),), skipped=3)
+    report = Report(location="u", page_size=10, findings=(), network=network)
+    lines = render(report, EN).splitlines()
+
+    assert "  Transferred: at least 100 bytes" in lines
+    assert "  Not downloaded, limit reached: 3" in lines
+
+
+def test_report_without_network_measures_has_no_network_section() -> None:
+    report = Report(location="page.html", page_size=10, findings=(), metrics=Metrics(requests=1))
+
+    assert "Network" not in render(report, EN)
 
 
 def test_renders_a_clean_report_without_claiming_full_compliance() -> None:

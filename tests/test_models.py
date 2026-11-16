@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from a11y_eco.models import Finding, Location, Severity
+from a11y_eco.models import Download, Finding, Location, NetworkMetrics, Severity
 
 
 def test_severities_are_ranked_from_least_to_most_severe() -> None:
@@ -44,3 +44,35 @@ def test_finding_is_immutable() -> None:
 
     with pytest.raises(dataclasses.FrozenInstanceError):
         finding.severity = Severity.INFO  # type: ignore[misc]
+
+
+def test_download_is_ok_only_with_a_2xx_status() -> None:
+    assert Download("u", status=204).ok
+    assert not Download("u", status=304).ok
+    assert not Download("u").ok  # no response at all
+
+
+def test_network_metrics_add_up_the_downloads() -> None:
+    network = NetworkMetrics(
+        downloads=(
+            Download("a", status=200, transferred=1000),
+            Download("b", status=404, transferred=150),
+            Download("c"),
+        )
+    )
+
+    assert (network.requests, network.failed, network.transferred) == (3, 2, 1150)
+    assert network.complete
+
+
+@pytest.mark.parametrize(
+    "network",
+    [
+        pytest.param(NetworkMetrics(downloads=(), skipped=2), id="files-skipped"),
+        pytest.param(NetworkMetrics(downloads=(Download("a", complete=False),)), id="cut-short"),
+    ],
+)
+def test_network_transfer_is_a_minimum_when_downloads_are_missing(
+    network: NetworkMetrics,
+) -> None:
+    assert not network.complete

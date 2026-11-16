@@ -3,7 +3,7 @@ from a11y_eco.checks import language
 from a11y_eco.checks.base import rule
 from a11y_eco.dom import Document, Element
 from a11y_eco.loader import Source
-from a11y_eco.models import Finding, Report, Severity
+from a11y_eco.models import Download, Finding, NetworkMetrics, Report, Severity
 
 HEAD = (
     "<head>"
@@ -71,3 +71,37 @@ def test_audit_measures_the_sobriety_of_the_page() -> None:
 
     assert report.metrics is not None
     assert report.metrics.requests == 2
+
+
+def test_audit_stays_offline_by_default() -> None:
+    assert audit(make_source("<p>Hello</p>")).network is None
+
+
+def test_audit_gives_the_parsed_page_to_the_fetcher() -> None:
+    received: list[Document] = []
+    measures = NetworkMetrics(downloads=(Download("https://www.example.com/", status=200),))
+
+    def fake_fetch(document: Document) -> NetworkMetrics:
+        received.append(document)
+        return measures
+
+    source = Source("https://www.example.com/", "<p>Hello</p>", size=12, encoding="utf-8")
+    report = audit(source, rules=[], fetch=fake_fetch)
+
+    assert report.network is measures
+    assert [document.url for document in received] == ["https://www.example.com/"]
+
+
+def test_network_rules_run_only_on_downloads() -> None:
+    uncompressed = Download(
+        "https://www.example.com/a.css",
+        status=200,
+        transferred=4096,
+        headers={"content-type": "text/css", "cache-control": "max-age=60"},
+    )
+    source = Source("https://www.example.com/", "<p>Hello</p>", size=12, encoding="utf-8")
+    offline = audit(source, rules=[])
+    online = audit(source, rules=[], fetch=lambda _: NetworkMetrics(downloads=(uncompressed,)))
+
+    assert offline.findings == ()
+    assert [f.rule_id for f in online.findings] == ["ECO-COMPRESSION"]

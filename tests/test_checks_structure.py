@@ -3,6 +3,9 @@ import pytest
 from a11y_eco.checks import structure
 from a11y_eco.checks.base import Rule
 from a11y_eco.dom import parse_html
+from a11y_eco.models import Severity
+
+TITLE_RULES = [structure.missing_page_title, structure.missing_title]
 
 
 def snippets(rule: Rule, markup: str) -> list[str]:
@@ -27,6 +30,7 @@ def test_missing_viewport(markup: str, reported: bool) -> None:
     assert bool(snippets(structure.missing_viewport, markup)) is reported
 
 
+@pytest.mark.parametrize("rule", TITLE_RULES, ids=lambda r: r.rule_id)
 @pytest.mark.parametrize(
     ("markup", "expected"),
     [
@@ -40,8 +44,17 @@ def test_missing_viewport(markup: str, reported: bool) -> None:
         ),
     ],
 )
-def test_missing_title(markup: str, expected: list[str]) -> None:
-    assert snippets(structure.missing_title, markup) == expected
+def test_both_title_rules_detect_the_same_defect(
+    rule: Rule, markup: str, expected: list[str]
+) -> None:
+    assert snippets(rule, markup) == expected
+
+
+def test_title_rules_differ_by_standard_and_severity() -> None:
+    a11y, eco = TITLE_RULES
+
+    assert (a11y.reference, a11y.severity) == ("RGAA 8.5", Severity.ERROR)
+    assert (eco.reference, eco.severity) == ("RWEB_0011", Severity.WARNING)
 
 
 @pytest.mark.parametrize(

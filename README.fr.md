@@ -36,6 +36,8 @@ a11y-eco audit page.html                 # un fichier local
 a11y-eco audit https://example.com       # une page web
 a11y-eco audit page.html --fail-on warning
 a11y-eco audit page.html --lang en       # rapport en anglais
+a11y-eco audit https://example.com --fetch-resources                     # mesures réseau réelles
+a11y-eco audit https://example.com --fetch-resources --include-external  # tiers compris
 ```
 
 Les rapports sont rédigés en français ou en anglais. La langue est prise dans `--lang`,
@@ -48,6 +50,24 @@ sinon dans la langue du système (`LANG`, `LC_ALL`…), et le français est util
 | `2`            | Arguments invalides, ou page impossible à charger                       |
 
 Les couleurs ne sont utilisées que dans un terminal interactif, et jamais quand `NO_COLOR` est définie.
+
+### Mesures réseau
+
+Par défaut, seul le HTML de la page est téléchargé. Avec `--fetch-resources`, a11y-eco
+télécharge aussi de nouveau la page et les fichiers qu'elle charge, 50 au plus, quatre à
+la fois, comme un navigateur : en annonçant gzip et Brotli, sans rien décompresser, afin
+que les octets comptés soient ceux réellement transférés. Rien n'est exécuté.
+
+Le rapport comporte alors une section séparée « Mesures réseau (valeurs réelles) », et
+quatre règles supplémentaires vérifient la compression (`RWEB_0076`), les en-têtes de
+cache (`RWEB_0075`), les cookies sur les fichiers statiques (`RWEB_0081`) et les
+redirections (`RWEB_0112`).
+
+Les fichiers des autres hôtes (CDN, polices, mesure d'audience, publicité) sont exclus,
+sauf avec `--include-external` : les télécharger révèle votre adresse IP à ces tiers. Un
+fichier local n'a pas d'hôte : ses adresses relatives ne peuvent pas être téléchargées,
+et toutes ses adresses absolues comptent comme d'autres hôtes. Sur un fichier local,
+`--fetch-resources` ne mesure donc rien sans `--include-external`.
 
 ## Règles d'éco-conception et crédits
 
@@ -65,8 +85,10 @@ sont utilisés.
 
 ## Limites d'un audit automatique
 
-- Seul le HTML envoyé par le serveur est lu : aucun JavaScript n'est exécuté, et les
-  feuilles de style et les scripts ne sont pas téléchargés.
+- Seul le HTML envoyé par le serveur est lu : aucun JavaScript n'est exécuté. Les
+  feuilles de style et les scripts ne sont téléchargés qu'avec `--fetch-resources`, et ne
+  sont jamais interprétés : les ressources qu'ils chargent (polices déclarées en CSS,
+  fichiers demandés par un script) restent invisibles.
 - Les nombres de requêtes et de ressources sont donc des **valeurs minimales**. Une règle
   d'éco-conception ne signale un problème que si ce minimum dépasse déjà le seuil de la
   bonne pratique : une page qui la respecte n'est jamais signalée, mais certains problèmes
@@ -77,6 +99,8 @@ sont utilisés.
 - Les outils tiers (mesure d'audience, boutons sociaux, carrousels, bibliothèques
   d'animation) sont reconnus d'après une liste d'outils connus : un outil absent de la
   liste n'est pas détecté.
+- Les règles réseau ne voient que les réponses des serveurs : les cookies déposés par
+  JavaScript ne sont pas détectés, et une chaîne de redirections compte pour une seule.
 
 ## Développement
 

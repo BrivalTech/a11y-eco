@@ -33,6 +33,15 @@ CATALOG = Catalog(
         "cli.audit.fail_on": "lowest severity that makes the command fail (default: %(default)s)",
         "cli.audit.lang": "language of the report (default: the language of the system, or fr)",
         "cli.audit.timeout": "network timeout when auditing a URL (default: %(default)s)",
+        "cli.audit.fetch_resources": (
+            "also download the page and the files it loads, at most {limit}, "
+            "to measure what really travels on the network"
+        ),
+        "cli.audit.include_external": (
+            "with --fetch-resources, also download the files of other hosts: "
+            "they will see your IP address"
+        ),
+        "cli.external_needs_fetch": "--include-external only works with --fetch-resources",
         "load.unreadable": "cannot read {path}: {reason}",
         "load.too_large": "{location} is larger than the {limit}-byte limit",
         "load.not_html": "{url} is not an HTML page ({content_type})",
@@ -47,6 +56,12 @@ CATALOG = Catalog(
         "metrics.external": "From another host: {count}",
         "metrics.domains": "Domains: {count}",
         "metrics.dom": "DOM elements: {count}",
+        "network.title": "Network measures (real values)",
+        "network.requests": "Requests: {count}",
+        "network.failed": "Failed downloads: {count}",
+        "network.transferred": "Transferred: {size} bytes",
+        "network.transferred_minimum": "Transferred: at least {size} bytes",
+        "network.skipped": "Not downloaded, limit reached: {count}",
         "resource.stylesheet.one": "{count} stylesheet",
         "resource.stylesheet.other": "{count} stylesheets",
         "resource.script.one": "{count} script",
@@ -75,6 +90,7 @@ CATALOG = Catalog(
         "count.info.other": "{count} info",
         "rule.A11Y-LANG-MISSING": "The default language of the page is not declared",
         "rule.A11Y-LANG-INVALID": "The language code of the page is not valid",
+        "rule.A11Y-PAGE-TITLE": "The page has no title, so screen readers cannot announce it",
         "rule.A11Y-IMG-ALT": "Image without a text alternative",
         "rule.A11Y-HEADING-H1-MISSING": "The page has no level 1 heading",
         "rule.A11Y-HEADING-H1-MULTIPLE": "The page has several level 1 headings",
@@ -100,7 +116,7 @@ CATALOG = Catalog(
         "rule.ECO-WEB-FONTS": "At least {count} downloaded fonts (recommended maximum: {limit})",
         "rule.ECO-CANVAS": "Canvas: check that HTML and CSS could not replace it",
         "rule.ECO-VIEWPORT": "No viewport meta tag: the page may not be designed for mobile",
-        "rule.ECO-TITLE": "The page has no title, or an empty one",
+        "rule.ECO-TITLE": "The page has no title, which makes it harder to find in search results",
         "rule.ECO-META-DESCRIPTION": "The page has no meta description, or an empty one",
         "rule.ECO-ANALYTICS": (
             "Analytics tool, one of {count} on the page (recommended maximum: {limit})"
@@ -111,5 +127,15 @@ CATALOG = Catalog(
             "Animation, one of {count} on the page (recommended maximum: {limit})"
         ),
         "rule.ECO-SVG-METADATA": "SVG image still holding metadata from its drawing tool",
+        "rule.ECO-COMPRESSION": (
+            "Text file sent uncompressed (gzip or Brotli would make it lighter)"
+        ),
+        "rule.ECO-CACHE-HEADERS": (
+            "No Expires or Cache-Control header: the browser cannot know how long to keep it"
+        ),
+        "rule.ECO-COOKIE-DOMAINS": (
+            "Static files served with cookies by {count} domains (recommended maximum: {limit})"
+        ),
+        "rule.ECO-REDIRECTS": "Redirection, one of {count} (recommended maximum: {limit})",
     },
 )

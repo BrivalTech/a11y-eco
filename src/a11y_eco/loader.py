@@ -18,6 +18,7 @@ from urllib.request import Request, urlopen
 from a11y_eco import __version__
 from a11y_eco.i18n import CATALOGS, Language
 
+USER_AGENT = f"a11y-eco/{__version__}"
 MAX_BYTES = 10 * 1024 * 1024
 HTML_CONTENT_TYPES = frozenset({"text/html", "application/xhtml+xml"})
 _BROWSER_ENCODINGS = {"ascii": "cp1252", "iso8859-1": "cp1252"}
@@ -146,7 +147,7 @@ def _load_file(path: Path, *, max_bytes: int) -> Source:
 
 
 def _load_url(url: str, *, timeout: float, max_bytes: int) -> Source:
-    request = Request(url, headers={"User-Agent": f"a11y-eco/{__version__}"})
+    request = Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urlopen(request, timeout=timeout) as response:
             content_type = response.headers.get_content_type()
