@@ -42,6 +42,15 @@ CATALOG = Catalog(
             "délai d'attente réseau pour une URL, en secondes "
             "(par défaut\N{NO-BREAK SPACE}: %(default)s)"
         ),
+        "cli.audit.fetch_resources": (
+            "télécharge aussi la page et les fichiers qu'elle charge, {limit} au plus, "
+            "pour mesurer ce qui transite réellement sur le réseau"
+        ),
+        "cli.audit.include_external": (
+            "avec --fetch-resources, télécharge aussi les fichiers des autres "
+            "hôtes\N{NO-BREAK SPACE}: ils verront votre adresse IP"
+        ),
+        "cli.external_needs_fetch": "--include-external ne fonctionne qu'avec --fetch-resources",
         "load.unreadable": "impossible de lire {path}\N{NO-BREAK SPACE}: {reason}",
         "load.too_large": "{location} dépasse la limite de {limit} octets",
         "load.not_html": "{url} n'est pas une page HTML ({content_type})",

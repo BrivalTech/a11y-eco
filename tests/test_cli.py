@@ -1,8 +1,10 @@
 import runpy
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from http_server import Route, serve
 
 from a11y_eco import __version__
 from a11y_eco.cli import PROG, ExitCode, main
@@ -14,6 +16,7 @@ HEAD = (
     '<meta name="description" content="A test page">'
     "</head>"
 )
+CSS = b"p { color: black; }"
 
 
 def test_version_flag_prints_version_and_exits_ok(capsys: pytest.CaptureFixture[str]) -> None:
@@ -200,7 +203,8 @@ def test_unreadable_page_is_reported_on_stderr(
         (["--timeout", "soon", "--lang", "fr"], "n'est pas un nombre"),
         (["--fail-on", "critical"], "invalid choice"),
         (["--lang", "de"], "invalid choice"),
-        (["--fail", "error"], "unrecognized arguments"),  # abbreviations are refused
+        (["--fail", "error"], "unrecognized arguments"),
+        (["--include-external", "--lang", "en"], "only works with --fetch-resources"),
     ],
 )
 def test_invalid_options_are_usage_errors(
@@ -247,3 +251,49 @@ def test_lang_option_accepts_the_equals_form(
     main(["audit", clean_page, "--lang=en"])
 
     assert capsys.readouterr().out.startswith("Audit of")
+
+
+@pytest.fixture(scope="module")
+def site() -> Iterator[str]:
+    """A page with one stylesheet on its own host and one on another host.
+
+    127.0.0.1 and localhost are the same server, but two different hosts for the tool.
+    """
+    routes: dict[str, Route] = {"/site.css": Route(CSS)}
+    with serve(routes) as base:
+        port = base.rsplit(":", 1)[1]
+        page = (
+            f'<!DOCTYPE html><html lang="en">{HEAD}<h1>Hello</h1>'
+            '<link rel="stylesheet" href="/site.css">'
+            f'<link rel="stylesheet" href="http://localhost:{port}/site.css">'
+            "</html>"
+        )
+        routes["/"] = Route(page.encode(), headers={"Content-Type": "text/html; charset=utf-8"})
+        yield f"{base}/"
+
+
+def test_audit_stays_offline_without_fetch_resources(
+    site: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["audit", site, "--lang", "en"])
+
+    assert "Network measures" not in capsys.readouterr().out
+
+
+def test_fetch_resources_downloads_the_files_of_the_page_host_only(
+    site: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    exit_code = main(["audit", site, "--fetch-resources", "--lang", "en"])
+    output = capsys.readouterr().out.splitlines()
+
+    assert exit_code == ExitCode.OK
+    assert "Network measures (real values)" in output
+    assert "  Requests: 2" in output  # the page and its own stylesheet
+
+
+def test_include_external_adds_the_files_of_other_hosts(
+    site: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    main(["audit", site, "--fetch-resources", "--include-external", "--lang", "en"])
+
+    assert "  Requests: 3" in capsys.readouterr().out.splitlines()

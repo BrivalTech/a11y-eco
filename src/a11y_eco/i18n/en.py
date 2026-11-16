@@ -33,6 +33,15 @@ CATALOG = Catalog(
         "cli.audit.fail_on": "lowest severity that makes the command fail (default: %(default)s)",
         "cli.audit.lang": "language of the report (default: the language of the system, or fr)",
         "cli.audit.timeout": "network timeout when auditing a URL (default: %(default)s)",
+        "cli.audit.fetch_resources": (
+            "also download the page and the files it loads, at most {limit}, "
+            "to measure what really travels on the network"
+        ),
+        "cli.audit.include_external": (
+            "with --fetch-resources, also download the files of other hosts: "
+            "they will see your IP address"
+        ),
+        "cli.external_needs_fetch": "--include-external only works with --fetch-resources",
         "load.unreadable": "cannot read {path}: {reason}",
         "load.too_large": "{location} is larger than the {limit}-byte limit",
         "load.not_html": "{url} is not an HTML page ({content_type})",
