@@ -2,7 +2,7 @@ import string
 
 import pytest
 
-from a11y_eco.checks import RULES
+from a11y_eco.checks import ALL_RULES
 from a11y_eco.i18n import CATALOGS, Language, detect_language
 from a11y_eco.i18n.catalog import Catalog
 from a11y_eco.models import ResourceType, Severity
@@ -38,7 +38,7 @@ def test_translations_use_the_same_placeholders(key: str) -> None:
 
 @pytest.mark.parametrize("catalog", CATALOGS.values(), ids=lambda c: c.language)
 def test_every_rule_has_a_title(catalog: Catalog) -> None:
-    missing = [r.rule_id for r in RULES if f"rule.{r.rule_id}" not in catalog.messages]
+    missing = [r.rule_id for r in ALL_RULES if f"rule.{r.rule_id}" not in catalog.messages]
     assert missing == []
 
 

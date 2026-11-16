@@ -1,7 +1,9 @@
 """The audit rules.
 
 Each module groups the rules of one theme. A new rule is declared with the
-``@rule`` decorator in its module, then added to ``RULES`` below.
+``@rule`` decorator in its module, then added to ``RULES`` below. A rule that reads
+the downloads of --fetch-resources is declared with ``@network_rule`` and added to
+``NETWORK_RULES``.
 """
 
 from a11y_eco.checks import (
@@ -14,8 +16,9 @@ from a11y_eco.checks import (
     sobriety,
     structure,
     tools,
+    transfer,
 )
-from a11y_eco.checks.base import Rule
+from a11y_eco.checks.base import NetworkRule, Rule
 
 RULES: tuple[Rule, ...] = (
     language.html_lang_missing,
@@ -49,4 +52,13 @@ RULES: tuple[Rule, ...] = (
     graphics.unoptimised_svg,
 )
 
-__all__ = ["RULES", "Rule"]
+NETWORK_RULES: tuple[NetworkRule, ...] = (
+    transfer.uncompressed_text,
+    transfer.missing_cache_headers,
+    transfer.static_files_with_cookies,
+    transfer.too_many_redirects,
+)
+
+ALL_RULES: tuple[Rule | NetworkRule, ...] = (*RULES, *NETWORK_RULES)
+
+__all__ = ["ALL_RULES", "NETWORK_RULES", "RULES", "NetworkRule", "Rule"]

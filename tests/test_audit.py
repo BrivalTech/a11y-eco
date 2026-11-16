@@ -90,3 +90,18 @@ def test_audit_gives_the_parsed_page_to_the_fetcher() -> None:
 
     assert report.network is measures
     assert [document.url for document in received] == ["https://www.example.com/"]
+
+
+def test_network_rules_run_only_on_downloads() -> None:
+    uncompressed = Download(
+        "https://www.example.com/a.css",
+        status=200,
+        transferred=4096,
+        headers={"content-type": "text/css", "cache-control": "max-age=60"},
+    )
+    source = Source("https://www.example.com/", "<p>Hello</p>", size=12, encoding="utf-8")
+    offline = audit(source, rules=[])
+    online = audit(source, rules=[], fetch=lambda _: NetworkMetrics(downloads=(uncompressed,)))
+
+    assert offline.findings == ()
+    assert [f.rule_id for f in online.findings] == ["ECO-COMPRESSION"]

@@ -173,5 +173,19 @@ CATALOG = Catalog(
         "rule.ECO-SVG-METADATA": (
             "Image SVG contenant encore les métadonnées de son logiciel de dessin"
         ),
+        "rule.ECO-COMPRESSION": (
+            "Fichier texte envoyé sans compression (gzip ou Brotli l'allégerait)"
+        ),
+        "rule.ECO-CACHE-HEADERS": (
+            "Ni Expires ni Cache-Control\N{NO-BREAK SPACE}: le navigateur ne sait pas "
+            "combien de temps le garder"
+        ),
+        "rule.ECO-COOKIE-DOMAINS": (
+            "Fichiers statiques servis avec des cookies par {count} domaines "
+            "(maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-REDIRECTS": (
+            "Redirection, l'une des {count} (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
     },
 )

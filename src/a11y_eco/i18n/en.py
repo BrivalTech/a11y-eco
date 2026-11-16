@@ -127,5 +127,15 @@ CATALOG = Catalog(
             "Animation, one of {count} on the page (recommended maximum: {limit})"
         ),
         "rule.ECO-SVG-METADATA": "SVG image still holding metadata from its drawing tool",
+        "rule.ECO-COMPRESSION": (
+            "Text file sent uncompressed (gzip or Brotli would make it lighter)"
+        ),
+        "rule.ECO-CACHE-HEADERS": (
+            "No Expires or Cache-Control header: the browser cannot know how long to keep it"
+        ),
+        "rule.ECO-COOKIE-DOMAINS": (
+            "Static files served with cookies by {count} domains (recommended maximum: {limit})"
+        ),
+        "rule.ECO-REDIRECTS": "Redirection, one of {count} (recommended maximum: {limit})",
     },
 )
