@@ -1,4 +1,4 @@
-"""Rules about the head of the page: viewport, title and description (RWEB)."""
+"""Rules about the head of the page: title (RGAA 8.5 and RWEB), viewport and description."""
 
 from __future__ import annotations
 
@@ -23,6 +23,17 @@ def _in_svg(element: Element) -> bool:
     return any(ancestor.tag == "svg" for ancestor in element.ancestors())
 
 
+def _untitled(document: Document) -> Iterator[Element]:
+    """Yield the empty <title>, or the page root if there is no <title> at all.
+
+    Shared by two rules that detect the same defect for two different reasons.
+    """
+    titles = [title for title in document.find_all("title") if not _in_svg(title)]
+
+    if not any(title.text_content() for title in titles):
+        yield titles[0] if titles else document.root
+
+
 @rule("ECO-VIEWPORT", severity=Severity.INFO, reference="RWEB_0004")
 def missing_viewport(document: Document) -> Iterator[Element]:
     """Without a viewport meta tag, mobile browsers show a shrunk desktop page."""
@@ -30,13 +41,16 @@ def missing_viewport(document: Document) -> Iterator[Element]:
         yield document.root
 
 
+@rule("A11Y-PAGE-TITLE", severity=Severity.ERROR, reference="RGAA 8.5")
+def missing_page_title(document: Document) -> Iterator[Element]:
+    """The title is the first thing a screen reader announces, and names the tab."""
+    yield from _untitled(document)
+
+
 @rule("ECO-TITLE", severity=Severity.WARNING, reference="RWEB_0011")
 def missing_title(document: Document) -> Iterator[Element]:
     """A page title lets people and search engines find the right page at once."""
-    titles = [title for title in document.find_all("title") if not _in_svg(title)]
-
-    if not any(title.text_content() for title in titles):
-        yield titles[0] if titles else document.root
+    yield from _untitled(document)
 
 
 @rule("ECO-META-DESCRIPTION", severity=Severity.WARNING, reference="RWEB_0011")

@@ -80,7 +80,8 @@ def clean_page(tmp_path: Path) -> str:
 @pytest.fixture
 def page_with_warning_only(tmp_path: Path) -> str:
     page = tmp_path / "warning.html"
-    page.write_text('<!DOCTYPE html>\n<html lang="fr"><p>No h1</p></html>', encoding="utf-8")
+    page.write_text(f'<!DOCTYPE html>\n<html lang="fr">{HEAD}<p>No h1</p></html>', encoding="utf-8")
+
     return str(page)
 
 

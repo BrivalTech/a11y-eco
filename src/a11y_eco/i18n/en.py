@@ -75,6 +75,7 @@ CATALOG = Catalog(
         "count.info.other": "{count} info",
         "rule.A11Y-LANG-MISSING": "The default language of the page is not declared",
         "rule.A11Y-LANG-INVALID": "The language code of the page is not valid",
+        "rule.A11Y-PAGE-TITLE": "The page has no title, so screen readers cannot announce it",
         "rule.A11Y-IMG-ALT": "Image without a text alternative",
         "rule.A11Y-HEADING-H1-MISSING": "The page has no level 1 heading",
         "rule.A11Y-HEADING-H1-MULTIPLE": "The page has several level 1 headings",
@@ -100,7 +101,7 @@ CATALOG = Catalog(
         "rule.ECO-WEB-FONTS": "At least {count} downloaded fonts (recommended maximum: {limit})",
         "rule.ECO-CANVAS": "Canvas: check that HTML and CSS could not replace it",
         "rule.ECO-VIEWPORT": "No viewport meta tag: the page may not be designed for mobile",
-        "rule.ECO-TITLE": "The page has no title, or an empty one",
+        "rule.ECO-TITLE": "The page has no title, which makes it harder to find in search results",
         "rule.ECO-META-DESCRIPTION": "The page has no meta description, or an empty one",
         "rule.ECO-ANALYTICS": (
             "Analytics tool, one of {count} on the page (recommended maximum: {limit})"

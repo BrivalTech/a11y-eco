@@ -20,6 +20,7 @@ from a11y_eco.checks.base import Rule
 RULES: tuple[Rule, ...] = (
     language.html_lang_missing,
     language.html_lang_invalid,
+    structure.missing_page_title,
     images.image_without_alternative,
     headings.missing_main_heading,
     headings.several_main_headings,

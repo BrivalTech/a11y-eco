@@ -87,6 +87,10 @@ CATALOG = Catalog(
         "count.info.other": "{count} infos",
         "rule.A11Y-LANG-MISSING": "La langue par défaut de la page n'est pas déclarée",
         "rule.A11Y-LANG-INVALID": "Le code de langue de la page n'est pas valide",
+        "rule.A11Y-PAGE-TITLE": (
+            "La page n'a pas de titre\N{NO-BREAK SPACE}: "
+            "les lecteurs d'écran ne peuvent pas l'annoncer"
+        ),
         "rule.A11Y-IMG-ALT": "Image sans alternative textuelle",
         "rule.A11Y-HEADING-H1-MISSING": "La page n'a pas de titre de niveau 1",
         "rule.A11Y-HEADING-H1-MULTIPLE": "La page a plusieurs titres de niveau 1",
@@ -130,7 +134,10 @@ CATALOG = Catalog(
             "Pas de balise meta viewport\N{NO-BREAK SPACE}: la page n'est peut-être pas "
             "conçue pour le mobile"
         ),
-        "rule.ECO-TITLE": "La page n'a pas de titre, ou un titre vide",
+        "rule.ECO-TITLE": (
+            "La page n'a pas de titre, ce qui la rend plus difficile à trouver "
+            "dans les résultats de recherche"
+        ),
         "rule.ECO-META-DESCRIPTION": "La page n'a pas de meta description, ou une description vide",
         "rule.ECO-ANALYTICS": (
             "Outil de mesure d'audience, l'un des {count} de la page "
