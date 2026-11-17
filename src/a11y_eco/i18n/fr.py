@@ -96,7 +96,113 @@ CATALOG = Catalog(
             "Un audit manuel reste nécessaire."
         ),
         "report.summary": "Résumé\N{NO-BREAK SPACE}: {counts}",
-        # HTML report
+        "cli.rules.help": "liste les règles d'audit",
+        "cli.rules.description": "Liste les règles d'audit, avec leur sévérité et leur référence.",
+        "cli.rules.format": "format de la liste (par défaut\N{NO-BREAK SPACE}: %(default)s)",
+        "rules.title": "Règles d'a11y-eco",
+        "rules.generated": (
+            "Généré par `a11y-eco rules --format markdown --lang {language}`\N{NO-BREAK SPACE}: "
+            "ne pas modifier à la main."
+        ),
+        "rules.count": "{count} règles.",
+        "rules.group.a11y": "Accessibilité (RGAA)",
+        "rules.group.eco": "Éco-conception (RWEB), d'après le HTML",
+        "rules.group.network": "Éco-conception (RWEB), avec --fetch-resources",
+        "rules.column.rule": "Règle",
+        "rules.column.severity": "Sévérité",
+        "rules.column.reference": "Référence",
+        "rules.column.about": "Ce qui est vérifié",
+        "about.A11Y-LANG-MISSING": (
+            "La langue par défaut de la page doit être déclarée sur l'élément html."
+        ),
+        "about.A11Y-LANG-INVALID": "La langue déclarée doit être un code de langue bien formé.",
+        "about.A11Y-PAGE-TITLE": (
+            "La page doit avoir un titre, la première chose qu'annonce un lecteur d'écran."
+        ),
+        "about.A11Y-IMG-ALT": (
+            "Chaque image doit avoir une alternative textuelle, vide si l'image est décorative."
+        ),
+        "about.A11Y-HEADING-H1-MISSING": "La page devrait avoir un titre de niveau 1.",
+        "about.A11Y-HEADING-H1-MULTIPLE": (
+            "Plusieurs titres de niveau 1 sont permis, mais révèlent souvent un problème de "
+            "structure."
+        ),
+        "about.A11Y-HEADING-SKIP": (
+            "Un titre ne doit pas descendre de plus d'un niveau sous le titre précédent."
+        ),
+        "about.A11Y-HEADING-EMPTY": (
+            "Un titre doit avoir un texte, éventuellement l'alternative d'une image."
+        ),
+        "about.A11Y-ARIA-LABELLEDBY": (
+            "Chaque id cité dans aria-labelledby doit exister dans la page."
+        ),
+        "about.A11Y-LINK-NAME": "Chaque lien doit avoir un nom accessible.",
+        "about.A11Y-BUTTON-NAME": "Chaque bouton doit avoir un nom accessible.",
+        "about.ECO-REQUESTS": "La page ne devrait pas faire plus de 40 requêtes à son chargement.",
+        "about.ECO-STYLESHEETS": "La page ne devrait pas charger plus de 10 feuilles de style.",
+        "about.ECO-DOMAINS": (
+            "La page et ses ressources ne devraient pas venir de plus de 5 domaines."
+        ),
+        "about.ECO-INLINE-CODE": (
+            "Les gros blocs de CSS et de JavaScript devraient être dans des fichiers externes, "
+            "que le navigateur garde en cache."
+        ),
+        "about.ECO-MEDIA-AUTOLOAD": (
+            "L'audio et la vidéo ne devraient être téléchargés qu'à la demande de l'utilisateur."
+        ),
+        "about.ECO-LAZY-LOADING": (
+            "Les images et les cadres qui peuvent être hors de l'écran devraient être chargés à "
+            "la demande."
+        ),
+        "about.ECO-EMBEDDED-DOCUMENT": (
+            "Les documents (PDF, bureautique) devraient être proposés en lien, pas affichés "
+            "dans la page."
+        ),
+        "about.ECO-GIF": (
+            "Les animations devraient être des vidéos plutôt que des images GIF, bien plus lourdes."
+        ),
+        "about.ECO-WEB-FONTS": "La page ne devrait pas télécharger plus de 2 polices.",
+        "about.ECO-CANVAS": (
+            "Un canvas est redessiné par script\N{NO-BREAK SPACE}: HTML et CSS suffisent "
+            "souvent, et sont plus légers."
+        ),
+        "about.ECO-VIEWPORT": (
+            "La page devrait déclarer un viewport, pour que les navigateurs mobiles ne "
+            "réduisent pas une page de bureau."
+        ),
+        "about.ECO-TITLE": (
+            "La page devrait avoir un titre, pour que les personnes et les moteurs de recherche "
+            "la trouvent tout de suite."
+        ),
+        "about.ECO-META-DESCRIPTION": (
+            "La page devrait avoir une meta description, qui la résume dans les résultats de "
+            "recherche."
+        ),
+        "about.ECO-ANALYTICS": "La page devrait utiliser au plus un outil de mesure d'audience.",
+        "about.ECO-SOCIAL-BUTTONS": (
+            "Les réseaux sociaux devraient être proposés par de simples liens, pas par leurs "
+            "lourds scripts officiels."
+        ),
+        "about.ECO-CAROUSEL": "La page devrait avoir au plus un carrousel.",
+        "about.ECO-ANIMATIONS": "La page ne devrait pas avoir plus de 2 animations.",
+        "about.ECO-SVG-METADATA": (
+            "Le SVG intégré devrait être débarrassé des métadonnées laissées par les logiciels "
+            "de dessin."
+        ),
+        "about.ECO-COMPRESSION": (
+            "Les fichiers HTML, CSS, JavaScript et SVG devraient être envoyés compressés (gzip, "
+            "Brotli)."
+        ),
+        "about.ECO-CACHE-HEADERS": (
+            "Les fichiers statiques devraient indiquer combien de temps les garder, avec "
+            "Expires ou Cache-Control."
+        ),
+        "about.ECO-COOKIE-DOMAINS": (
+            "Les fichiers statiques devraient venir d'au plus un domaine qui utilise des cookies."
+        ),
+        "about.ECO-REDIRECTS": (
+            "Le chargement de la page ne devrait pas passer par plus d'une redirection."
+        ),
         "html.description": (
             "Rapport d'audit d'accessibilité et d'éco-conception produit par a11y-eco"
         ),

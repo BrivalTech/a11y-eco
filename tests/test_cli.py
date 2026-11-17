@@ -282,6 +282,22 @@ def test_audit_stays_offline_without_fetch_resources(
     assert "Network measures" not in capsys.readouterr().out
 
 
+def test_rules_command_lists_the_rules_in_the_chosen_language(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(["rules", "--lang", "fr"])
+    output = capsys.readouterr().out
+
+    assert exit_code == ExitCode.OK
+    assert output.startswith("Accessibilité (RGAA)\n  A11Y-LANG-MISSING ")
+
+
+def test_rules_command_writes_json(capsys: pytest.CaptureFixture[str]) -> None:
+    main(["rules", "--format", "json", "--lang", "en"])
+
+    assert json.loads(capsys.readouterr().out)["language"] == "en"
+
+
 def test_json_report_goes_to_stdout_and_keeps_the_exit_code(
     page_without_lang: str, capsys: pytest.CaptureFixture[str]
 ) -> None:
