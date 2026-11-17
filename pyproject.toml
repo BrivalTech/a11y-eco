@@ -19,11 +19,13 @@ a11y-eco = "a11y_eco.cli:main"
 
 [dependency-groups]
 dev = [
+    "jsonschema>=4.23",
     "mypy>=1.13",
     "pre-commit>=4.0",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.8",
+    "types-jsonschema",
 ]
 
 [tool.hatch.version]
