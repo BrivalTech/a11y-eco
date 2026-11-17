@@ -7,8 +7,16 @@
 Audit d'**accessibilité** et d'**éco-conception** d'une page web, en ligne de commande,
 **sans aucune dépendance** à l'exécution.
 
-> **Statut : pré-alpha.** Le projet est en cours de développement, sprint après sprint.
-> Rien n'est encore publié sur PyPI.
+> **Statut : alpha.** Les règles et le format JSON peuvent encore évoluer avant la 1.0.
+
+## Installation
+
+Nécessite Python 3.12 ou plus récent. a11y-eco n'a aucune dépendance.
+
+```sh
+pipx install a11y-eco        # recommandé pour un outil en ligne de commande
+python -m pip install a11y-eco
+```
 
 ## Objectifs
 
@@ -101,6 +109,10 @@ de position dans le HTML, et `details` contient des nombres bruts comme `count` 
 `limit`. Les en-têtes HTTP ne sont jamais inclus : ils peuvent contenir des cookies de
 session.
 
+La liste complète des règles est dans [docs/rules.fr.md](docs/rules.fr.md) (ou avec
+`a11y-eco rules`), et le rapport JSON est décrit par un
+[JSON Schema](schema/report-v1.schema.json).
+
 ## Règles d'éco-conception et crédits
 
 Les règles d'éco-conception renvoient aux bonnes pratiques du **RWEB** (*Référentiel
@@ -152,4 +164,4 @@ a11y-eco --version
 
 ## Licence
 
-[MIT](LICENSE)
+[MIT](https://github.com/brivaltech/a11y-eco/blob/main/LICENSE)

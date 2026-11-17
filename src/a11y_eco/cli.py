@@ -27,6 +27,7 @@ from a11y_eco.models import Severity
 from a11y_eco.network import MAX_DOWNLOADS, fetch_resources
 from a11y_eco.reporters import REPORTERS, Format
 from a11y_eco.reporters.console import should_use_color
+from a11y_eco.rule_list import LIST_FORMATS, render_rules
 
 PROG = "a11y-eco"
 FAIL_ON_CHOICES = [*(severity.value for severity in reversed(Severity)), "never"]
@@ -114,6 +115,19 @@ def build_parser(catalog: Catalog) -> argparse.ArgumentParser:
     )
     options.add_argument("--output", metavar="FILE", help=text("cli.audit.output"))
 
+    rules_parser = commands.add_parser(
+        "rules",
+        help=text("cli.rules.help"),
+        description=text("cli.rules.description"),
+        catalog=catalog,
+    )
+    options = rules_parser.add_argument_group(text("cli.options"))
+    options.add_argument("-h", "--help", action="help", help=text("cli.help"))
+    options.add_argument(
+        "--format", choices=LIST_FORMATS, default="console", help=text("cli.rules.format")
+    )
+    options.add_argument("--lang", choices=LANGUAGE_CHOICES, help=text("cli.audit.lang"))
+
     return parser
 
 
@@ -148,6 +162,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             output=args.output,
             catalog=catalog,
         )
+
+    if args.command == "rules":
+        sys.stdout.write(render_rules(catalog, args.format))
+        return ExitCode.OK
 
     parser.print_help()
 

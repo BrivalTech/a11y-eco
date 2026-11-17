@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-17
+
 ### Added
 
 - Project skeleton: `src` layout, `pyproject.toml` (hatchling), Ruff, pytest with coverage.
@@ -89,3 +91,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   severity always written in full, contrast of at least 4.5:1 in light and dark themes,
   print styles. Content of the audited page is escaped, and the report passes its own audit.
 - Reporters share one protocol and one registry: a new format is a module and one line.
+- `a11y-eco rules` lists every rule (console, JSON or Markdown), in English or French;
+  `docs/rules.md` and `docs/rules.fr.md` are generated from it and checked by the tests.
+- JSON Schema of the report (`schema/report-v1.schema.json`), checked against real
+  reports in the tests.
+- Package metadata for PyPI: classifiers, project links, absolute links in the README.
+- Release workflow: a GitHub release goes to TestPyPI, then to PyPI after approval,
+  with Trusted Publishing and attestations.
+- Tests on Python 3.14; the smoke test runs a real audit from the built wheel.
+
+
+[Unreleased]: https://github.com/brivaltech/a11y-eco/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/brivaltech/a11y-eco/releases/tag/v0.1.0

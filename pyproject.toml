@@ -11,19 +11,43 @@ requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "BrivalTech" }]
-keywords = ["accessibility", "a11y", "rgaa", "eco-design", "green-it", "audit", "cli"]
+keywords = ["accessibility", "a11y", "rgaa", "eco-design", "green-it", "rweb", "audit", "cli"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Natural Language :: French",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: Site Management",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/brivaltech/a11y-eco"
+Documentation = "https://github.com/brivaltech/a11y-eco#readme"
+Rules = "https://github.com/brivaltech/a11y-eco/blob/main/docs/rules.md"
+Changelog = "https://github.com/brivaltech/a11y-eco/blob/main/CHANGELOG.md"
+Issues = "https://github.com/brivaltech/a11y-eco/issues"
 
 [project.scripts]
 a11y-eco = "a11y_eco.cli:main"
 
 [dependency-groups]
 dev = [
+    "jsonschema>=4.23",
     "mypy>=1.13",
     "pre-commit>=4.0",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.8",
+    "types-jsonschema",
 ]
 
 [tool.hatch.version]

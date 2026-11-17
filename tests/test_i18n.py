@@ -121,3 +121,11 @@ def test_every_resource_type_has_both_plural_forms(catalog: Catalog) -> None:
     for kind in ResourceType:
         assert f"resource.{kind}.one" in catalog.messages
         assert f"resource.{kind}.other" in catalog.messages
+
+
+@pytest.mark.parametrize("catalog", CATALOGS.values(), ids=lambda c: c.language)
+@pytest.mark.parametrize("prefix", ["rule", "about"])
+def test_every_rule_has_a_title_and_a_description(catalog: Catalog, prefix: str) -> None:
+    missing = [r.rule_id for r in ALL_RULES if f"{prefix}.{r.rule_id}" not in catalog.messages]
+
+    assert missing == []
