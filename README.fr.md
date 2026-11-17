@@ -101,6 +101,10 @@ de position dans le HTML, et `details` contient des nombres bruts comme `count` 
 `limit`. Les en-têtes HTTP ne sont jamais inclus : ils peuvent contenir des cookies de
 session.
 
+La liste complète des règles est dans [docs/rules.fr.md](docs/rules.fr.md) (ou avec
+`a11y-eco rules`), et le rapport JSON est décrit par un
+[JSON Schema](schema/report-v1.schema.json).
+
 ## Règles d'éco-conception et crédits
 
 Les règles d'éco-conception renvoient aux bonnes pratiques du **RWEB** (*Référentiel
@@ -152,4 +156,4 @@ a11y-eco --version
 
 ## Licence
 
-[MIT](LICENSE)
+[MIT](https://github.com/brivaltech/a11y-eco/blob/main/LICENSE)

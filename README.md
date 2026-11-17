@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/brivaltech/a11y-eco/actions/workflows/ci.yml/badge.svg)](https://github.com/brivaltech/a11y-eco/actions/workflows/ci.yml)
 
-🇫🇷 [Lire en français](README.fr.md)
+🇫🇷 [Lire en français](https://github.com/brivaltech/a11y-eco/blob/main/README.fr.md)
 
 Audit a web page for **accessibility** and **eco-design** issues, from the command line,
 with **zero runtime dependencies**.
@@ -95,6 +95,10 @@ Only `message` is translated. `line` and `column` are `null` when a finding has 
 position in the HTML, and `details` holds raw numbers such as `count` and `limit`.
 HTTP headers are never included: they may hold session cookies.
 
+The full list of rules is in [docs/rules.md](https://github.com/brivaltech/a11y-eco/blob/main/docs/rules.md)
+(or run `a11y-eco rules`), and the JSON report is described by a
+[JSON Schema](https://github.com/brivaltech/a11y-eco/blob/main/schema/report-v1.schema.json).
+
 ## Eco-design rules and credits
 
 Eco-design rules refer to the practices of the **RWEB** (*Référentiel d'écoconception web*,
@@ -141,4 +145,4 @@ a11y-eco --version
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/brivaltech/a11y-eco/blob/main/LICENSE)
