@@ -12,7 +12,8 @@ from collections.abc import Mapping
 from typing import TextIO
 
 from a11y_eco.i18n import Catalog
-from a11y_eco.models import Finding, Metrics, NetworkMetrics, Report, ResourceType, Severity
+from a11y_eco.models import Finding, Report, Severity
+from a11y_eco.reporters.base import finding_message, metrics_measures, network_measures, summary
 
 _SEVERITY_COLORS = {Severity.ERROR: "31", Severity.WARNING: "33", Severity.INFO: "36"}
 _BOLD = "1"
@@ -54,9 +55,11 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
     lines = [_style(title, _BOLD, enabled=color), ""]
 
     if report.metrics is not None:
-        lines.extend(_render_metrics(report.metrics, catalog, color=color))
+        measures = metrics_measures(report.metrics, catalog)
+        lines.extend(_render_section(catalog.text("metrics.title"), measures, color=color))
     if report.network is not None:
-        lines.extend(_render_network(report.network, catalog, color=color))
+        measures = network_measures(report.network, catalog)
+        lines.extend(_render_section(catalog.text("network.title"), measures, color=color))
 
     label_width = max(len(catalog.text(f"severity.{severity}")) for severity in Severity)
 
@@ -67,48 +70,13 @@ def render(report: Report, catalog: Catalog, *, color: bool = False) -> str:
         lines.append(catalog.text("report.clean"))
         lines.append("")
 
-    counts = ", ".join(
-        catalog.count(f"count.{severity}", report.count(severity))
-        for severity in reversed(Severity)
-    )
-    lines.append(catalog.text("report.summary", counts=counts))
+    lines.append(summary(report, catalog))
 
     return "\n".join(lines) + "\n"
 
 
-def _render_metrics(metrics: Metrics, catalog: Catalog, *, color: bool) -> list[str]:
-    number = catalog.number
-    resources = ", ".join(
-        catalog.count(f"resource.{kind}", metrics.resources_by_type[kind])
-        for kind in ResourceType
-        if metrics.resources_by_type.get(kind)
-    ) or catalog.text("metrics.none")
-    measures = [
-        catalog.text("metrics.requests", count=number(metrics.requests)),
-        catalog.text("metrics.resources", list=resources),
-        catalog.text("metrics.deferred", count=number(metrics.deferred)),
-        catalog.text("metrics.external", count=number(metrics.external)),
-        catalog.text("metrics.domains", count=number(metrics.domains)),
-        catalog.text("metrics.dom", count=number(metrics.dom_elements)),
-    ]
-    title = _style(catalog.text("metrics.title"), _BOLD, enabled=color)
-
-    return [title, *(f"  {measure}" for measure in measures), ""]
-
-
-def _render_network(network: NetworkMetrics, catalog: Catalog, *, color: bool) -> list[str]:
-    number = catalog.number
-    transferred = "network.transferred" if network.complete else "network.transferred_minimum"
-    measures = [
-        catalog.text("network.requests", count=number(network.requests)),
-        catalog.text("network.failed", count=number(network.failed)),
-        catalog.text(transferred, size=number(network.transferred)),
-    ]
-    if network.skipped:
-        measures.append(catalog.text("network.skipped", count=number(network.skipped)))
-    title = _style(catalog.text("network.title"), _BOLD, enabled=color)
-
-    return [title, *(f"  {measure}" for measure in measures), ""]
+def _render_section(title: str, measures: list[str], *, color: bool) -> list[str]:
+    return [_style(title, _BOLD, enabled=color), *(f"  {measure}" for measure in measures), ""]
 
 
 def _render_finding(
@@ -121,7 +89,7 @@ def _render_finding(
     references = ", ".join(part for part in (finding.rule_id, finding.reference) if part)
     lines = [
         f"{label}  {position}",
-        f"{indent}{_title(finding, catalog)} [{references}]",
+        f"{indent}{finding_message(finding, catalog)} [{references}]",
     ]
 
     if finding.snippet:
@@ -129,13 +97,6 @@ def _render_finding(
     lines.append("")
 
     return lines
-
-
-def _title(finding: Finding, catalog: Catalog) -> str:
-    """Describe the problem, with its values written in the language of the catalog."""
-    values = {name: catalog.number(value) for name, value in finding.details.items()}
-
-    return catalog.rule_title(finding.rule_id, **values)
 
 
 def _shorten(snippet: str) -> str:

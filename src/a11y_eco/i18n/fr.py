@@ -28,7 +28,7 @@ CATALOG = Catalog(
             "code de sortie\N{NO-BREAK SPACE}:\n"
             "  0  aucun problème n'atteint la sévérité de --fail-on\n"
             "  1  au moins un problème atteint la sévérité de --fail-on\n"
-            "  2  arguments invalides, ou page impossible à charger\n"
+            "  2  arguments invalides, page non chargée ou rapport non écrit\n"
         ),
         "cli.audit.target": "URL (http ou https) ou chemin d'un fichier HTML",
         "cli.audit.fail_on": (
@@ -50,6 +50,9 @@ CATALOG = Catalog(
             "avec --fetch-resources, télécharge aussi les fichiers des autres "
             "hôtes\N{NO-BREAK SPACE}: ils verront votre adresse IP"
         ),
+        "cli.audit.format": "format du rapport (par défaut\N{NO-BREAK SPACE}: %(default)s)",
+        "cli.audit.output": "écrit le rapport dans FILE au lieu de la sortie standard",
+        "cli.cannot_write": "impossible d'écrire {path}\N{NO-BREAK SPACE}: {reason}",
         "cli.external_needs_fetch": "--include-external ne fonctionne qu'avec --fetch-resources",
         "load.unreadable": "impossible de lire {path}\N{NO-BREAK SPACE}: {reason}",
         "load.too_large": "{location} dépasse la limite de {limit} octets",
@@ -93,6 +96,14 @@ CATALOG = Catalog(
             "Un audit manuel reste nécessaire."
         ),
         "report.summary": "Résumé\N{NO-BREAK SPACE}: {counts}",
+        # HTML report
+        "html.description": (
+            "Rapport d'audit d'accessibilité et d'éco-conception produit par a11y-eco"
+        ),
+        "html.findings": "Problèmes détectés",
+        "html.finding": "{severity}\N{NO-BREAK SPACE}: {message}",
+        "html.position": "ligne {line}, colonne {column}",
+        "html.generated": "Rapport généré par a11y-eco {version}",
         "severity.error": "erreur",
         "severity.warning": "avertissement",
         "severity.info": "info",

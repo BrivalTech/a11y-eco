@@ -1,3 +1,4 @@
+import json
 import runpy
 import sys
 from collections.abc import Iterator
@@ -205,6 +206,7 @@ def test_unreadable_page_is_reported_on_stderr(
         (["--lang", "de"], "invalid choice"),
         (["--fail", "error"], "unrecognized arguments"),
         (["--include-external", "--lang", "en"], "only works with --fetch-resources"),
+        (["--format", "xml"], "invalid choice"),
     ],
 )
 def test_invalid_options_are_usage_errors(
@@ -278,6 +280,42 @@ def test_audit_stays_offline_without_fetch_resources(
     main(["audit", site, "--lang", "en"])
 
     assert "Network measures" not in capsys.readouterr().out
+
+
+def test_json_report_goes_to_stdout_and_keeps_the_exit_code(
+    page_without_lang: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    exit_code = main(["audit", page_without_lang, "--format", "json", "--lang", "en"])
+    document = json.loads(capsys.readouterr().out)
+
+    assert exit_code == ExitCode.FINDINGS  # --fail-on applies whatever the format
+    assert "A11Y-LANG-MISSING" in [finding["rule_id"] for finding in document["findings"]]
+
+
+@pytest.mark.parametrize("output_format", ["console", "json", "html"])
+def test_output_writes_the_report_to_a_file(
+    page_without_lang: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    output_format: str,
+) -> None:
+    output = tmp_path / f"a11y-eco-report.{output_format}"
+    main(["audit", page_without_lang, "--format", output_format, "--output", str(output)])
+    written = output.read_text(encoding="utf-8")
+
+    assert capsys.readouterr().out == ""  # nothing else on the screen
+    assert "n'est pas déclarée" in written  # the default language, written as UTF-8
+    assert "\x1b[" not in written  # never colours in a file
+
+
+def test_unwritable_output_is_a_usage_error(
+    page_without_lang: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    exit_code = main(["audit", page_without_lang, "--output", str(tmp_path), "--lang", "en"])
+    captured = capsys.readouterr()
+
+    assert exit_code == ExitCode.USAGE_ERROR
+    assert captured.err.startswith(f"{PROG}: error: cannot write {tmp_path}")
 
 
 def test_fetch_resources_downloads_the_files_of_the_page_host_only(

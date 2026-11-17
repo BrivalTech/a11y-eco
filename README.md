@@ -35,6 +35,8 @@ a11y-eco audit page.html --fail-on warning
 a11y-eco audit page.html --lang en       # report in English
 a11y-eco audit https://example.com --fetch-resources                     # real network measures
 a11y-eco audit https://example.com --fetch-resources --include-external  # third parties too
+a11y-eco audit https://example.com --format json                       # for programs
+a11y-eco audit https://example.com --format html --output a11y-eco-report.html
 ```
 
 Reports are written in English or French. The language is taken from `--lang`,
@@ -64,6 +66,34 @@ Files from other hosts (CDN, fonts, analytics, ads) are left out unless
 parties. A local file has no host, so its relative addresses cannot be downloaded and
 all its absolute addresses count as other hosts: with a local file,
 `--fetch-resources` measures nothing without `--include-external`.
+
+### Report formats
+
+`--format` chooses the report: `console` (default), `json` or `html`. Reports go to the
+standard output, or to a UTF-8 file with `--output FILE`. `--fail-on` applies whatever
+the format, so a CI job can keep a report and fail in a single command.
+
+The **HTML report** is one self-contained page, without JavaScript or external files. It
+is checked by a11y-eco itself in the test suite, and everything that comes from the
+audited page is escaped.
+
+The **JSON report** is meant for programs. Its keys are stable within a
+`schema_version`:
+
+| Key | Content |
+|---|---|
+| `schema_version` | Version of the structure, increased on every breaking change |
+| `tool` | `name` and `version` of a11y-eco |
+| `language` | Language of the `message` fields (`en` or `fr`) |
+| `page` | `location` (path or URL) and `size` in bytes |
+| `summary` | Number of findings for `error`, `warning` and `info` |
+| `metrics` | Measures read from the HTML (minimum values), or `null` |
+| `network` | Measures taken with `--fetch-resources`, with the list of `downloads`, or `null` |
+| `findings` | `rule_id`, `severity`, `reference`, `message`, `line`, `column`, `snippet`, `details` |
+
+Only `message` is translated. `line` and `column` are `null` when a finding has no
+position in the HTML, and `details` holds raw numbers such as `count` and `limit`.
+HTTP headers are never included: they may hold session cookies.
 
 ## Eco-design rules and credits
 
