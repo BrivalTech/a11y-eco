@@ -96,6 +96,14 @@ CATALOG = Catalog(
             "Un audit manuel reste nécessaire."
         ),
         "report.summary": "Résumé\N{NO-BREAK SPACE}: {counts}",
+        # HTML report
+        "html.description": (
+            "Rapport d'audit d'accessibilité et d'éco-conception produit par a11y-eco"
+        ),
+        "html.findings": "Problèmes détectés",
+        "html.finding": "{severity}\N{NO-BREAK SPACE}: {message}",
+        "html.position": "ligne {line}, colonne {column}",
+        "html.generated": "Rapport généré par a11y-eco {version}",
         "severity.error": "erreur",
         "severity.warning": "avertissement",
         "severity.info": "info",

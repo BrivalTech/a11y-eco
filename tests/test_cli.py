@@ -292,7 +292,7 @@ def test_json_report_goes_to_stdout_and_keeps_the_exit_code(
     assert "A11Y-LANG-MISSING" in [finding["rule_id"] for finding in document["findings"]]
 
 
-@pytest.mark.parametrize("output_format", ["console", "json"])
+@pytest.mark.parametrize("output_format", ["console", "json", "html"])
 def test_output_writes_the_report_to_a_file(
     page_without_lang: str,
     tmp_path: Path,
