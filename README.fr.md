@@ -38,6 +38,8 @@ a11y-eco audit page.html --fail-on warning
 a11y-eco audit page.html --lang en       # rapport en anglais
 a11y-eco audit https://example.com --fetch-resources                     # mesures réseau réelles
 a11y-eco audit https://example.com --fetch-resources --include-external  # tiers compris
+a11y-eco audit https://example.com --format json                       # pour les programmes
+a11y-eco audit https://example.com --format html --output a11y-eco-report.html
 ```
 
 Les rapports sont rédigés en français ou en anglais. La langue est prise dans `--lang`,
@@ -68,6 +70,36 @@ sauf avec `--include-external` : les télécharger révèle votre adresse IP à 
 fichier local n'a pas d'hôte : ses adresses relatives ne peuvent pas être téléchargées,
 et toutes ses adresses absolues comptent comme d'autres hôtes. Sur un fichier local,
 `--fetch-resources` ne mesure donc rien sans `--include-external`.
+
+### Formats de rapport
+
+`--format` choisit le rapport : `console` (par défaut), `json` ou `html`. Les rapports
+sont écrits sur la sortie standard, ou dans un fichier UTF-8 avec `--output FICHIER`.
+`--fail-on` s'applique quel que soit le format : un job de CI peut garder un rapport et
+échouer en une seule commande.
+
+Le **rapport HTML** est une page autonome, sans JavaScript ni fichier externe. Il est
+vérifié par a11y-eco lui-même dans la suite de tests, et tout ce qui provient de la page
+auditée est échappé.
+
+Le **rapport JSON** est destiné aux programmes. Ses clés sont stables pour une même
+`schema_version` :
+
+| Clé | Contenu |
+|---|---|
+| `schema_version` | Version de la structure, augmentée à chaque changement incompatible |
+| `tool` | `name` et `version` d'a11y-eco |
+| `language` | Langue des champs `message` (`en` ou `fr`) |
+| `page` | `location` (chemin ou URL) et `size` en octets |
+| `summary` | Nombre de problèmes `error`, `warning` et `info` |
+| `metrics` | Mesures lues dans le HTML (valeurs minimales), ou `null` |
+| `network` | Mesures prises avec `--fetch-resources`, avec la liste des `downloads`, ou `null` |
+| `findings` | `rule_id`, `severity`, `reference`, `message`, `line`, `column`, `snippet`, `details` |
+
+Seul `message` est traduit. `line` et `column` valent `null` quand un problème n'a pas
+de position dans le HTML, et `details` contient des nombres bruts comme `count` et
+`limit`. Les en-têtes HTTP ne sont jamais inclus : ils peuvent contenir des cookies de
+session.
 
 ## Règles d'éco-conception et crédits
 

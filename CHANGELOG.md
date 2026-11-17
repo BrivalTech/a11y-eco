@@ -81,3 +81,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network rules, run only with `--fetch-resources`: `ECO-COMPRESSION` (RWEB_0076),
   `ECO-CACHE-HEADERS` (RWEB_0075), `ECO-COOKIE-DOMAINS` (RWEB_0081),
   `ECO-REDIRECTS` (RWEB_0112).
+- `--format console|json|html` and `--output FILE`; reports written to a file are UTF-8
+  and never coloured, and `--fail-on` applies whatever the format.
+- JSON report with a `schema_version`: stable English keys, raw numbers in `details`,
+  translated `message`, network downloads without their HTTP headers.
+- HTML report: one self-contained page without JavaScript, semantic headings and lists,
+  severity always written in full, contrast of at least 4.5:1 in light and dark themes,
+  print styles. Content of the audited page is escaped, and the report passes its own audit.
+- Reporters share one protocol and one registry: a new format is a module and one line.

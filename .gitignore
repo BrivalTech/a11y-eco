@@ -12,3 +12,6 @@ htmlcov/
 .DS_Store
 sandbox.py
 page.html
+a11y-eco-report.json
+a11y-eco-report.html
+
