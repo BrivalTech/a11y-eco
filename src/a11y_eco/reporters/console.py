@@ -13,6 +13,7 @@ from typing import TextIO
 
 from a11y_eco.i18n import Catalog
 from a11y_eco.models import Finding, Metrics, NetworkMetrics, Report, ResourceType, Severity
+from a11y_eco.reporters.base import finding_message
 
 _SEVERITY_COLORS = {Severity.ERROR: "31", Severity.WARNING: "33", Severity.INFO: "36"}
 _BOLD = "1"
@@ -121,7 +122,7 @@ def _render_finding(
     references = ", ".join(part for part in (finding.rule_id, finding.reference) if part)
     lines = [
         f"{label}  {position}",
-        f"{indent}{_title(finding, catalog)} [{references}]",
+        f"{indent}{finding_message(finding, catalog)} [{references}]",
     ]
 
     if finding.snippet:
@@ -129,13 +130,6 @@ def _render_finding(
     lines.append("")
 
     return lines
-
-
-def _title(finding: Finding, catalog: Catalog) -> str:
-    """Describe the problem, with its values written in the language of the catalog."""
-    values = {name: catalog.number(value) for name, value in finding.details.items()}
-
-    return catalog.rule_title(finding.rule_id, **values)
 
 
 def _shorten(snippet: str) -> str:
