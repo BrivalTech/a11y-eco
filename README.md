@@ -7,8 +7,16 @@
 Audit a web page for **accessibility** and **eco-design** issues, from the command line,
 with **zero runtime dependencies**.
 
-> **Status: pre-alpha.** The project is under active development, one sprint at a time.
-> Nothing is published on PyPI yet.
+> **Status: alpha.** The rules and the JSON format may still change before 1.0.
+
+## Installation
+
+Requires Python 3.12 or newer. a11y-eco has no dependencies.
+
+```sh
+pipx install a11y-eco        # recommended for a command-line tool
+python -m pip install a11y-eco
+```
 
 ## Goals
 

@@ -7,8 +7,16 @@
 Audit d'**accessibilité** et d'**éco-conception** d'une page web, en ligne de commande,
 **sans aucune dépendance** à l'exécution.
 
-> **Statut : pré-alpha.** Le projet est en cours de développement, sprint après sprint.
-> Rien n'est encore publié sur PyPI.
+> **Statut : alpha.** Les règles et le format JSON peuvent encore évoluer avant la 1.0.
+
+## Installation
+
+Nécessite Python 3.12 ou plus récent. a11y-eco n'a aucune dépendance.
+
+```sh
+pipx install a11y-eco        # recommandé pour un outil en ligne de commande
+python -m pip install a11y-eco
+```
 
 ## Objectifs
 
