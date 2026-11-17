@@ -16,6 +16,7 @@ import sys
 from collections.abc import Callable, Sequence
 from enum import IntEnum
 from functools import partial
+from pathlib import Path
 from typing import Any, NoReturn
 
 from a11y_eco import __version__
@@ -24,7 +25,8 @@ from a11y_eco.i18n import CATALOGS, Catalog, Language, detect_language
 from a11y_eco.loader import LoadError, load
 from a11y_eco.models import Severity
 from a11y_eco.network import MAX_DOWNLOADS, fetch_resources
-from a11y_eco.reporters.console import render, should_use_color
+from a11y_eco.reporters import REPORTERS, Format
+from a11y_eco.reporters.console import should_use_color
 
 PROG = "a11y-eco"
 FAIL_ON_CHOICES = [*(severity.value for severity in reversed(Severity)), "never"]
@@ -104,6 +106,13 @@ def build_parser(catalog: Catalog) -> argparse.ArgumentParser:
     options.add_argument(
         "--include-external", action="store_true", help=text("cli.audit.include_external")
     )
+    options.add_argument(
+        "--format",
+        choices=[output_format.value for output_format in Format],
+        default=Format.CONSOLE.value,
+        help=text("cli.audit.format"),
+    )
+    options.add_argument("--output", metavar="FILE", help=text("cli.audit.output"))
 
     return parser
 
@@ -129,9 +138,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             fetch = partial(
                 fetch_resources, include_external=args.include_external, timeout=args.timeout
             )
+
         return _run_audit(
-            args.target, fail_on=args.fail_on, timeout=args.timeout, fetch=fetch, catalog=catalog
+            args.target,
+            fail_on=args.fail_on,
+            timeout=args.timeout,
+            fetch=fetch,
+            output_format=Format(args.format),
+            output=args.output,
+            catalog=catalog,
         )
+
     parser.print_help()
 
     return ExitCode.OK
@@ -156,22 +173,42 @@ def _requested_language(arguments: Sequence[str]) -> Language:
 
 
 def _run_audit(
-    target: str, *, fail_on: str, timeout: float, fetch: Fetcher | None, catalog: Catalog
+    target: str,
+    *,
+    fail_on: str,
+    timeout: float,
+    fetch: Fetcher | None,
+    output_format: Format,
+    output: str | None,
+    catalog: Catalog,
 ) -> ExitCode:
     try:
         source = load(target, timeout=timeout)
     except LoadError as error:
-        message = catalog.text(error.key, **error.params)
-        print(catalog.text("cli.error", prog=PROG, message=message), file=sys.stderr)
+        _print_error(catalog.text(error.key, **error.params), catalog)
         return ExitCode.USAGE_ERROR
 
     report = audit(source, fetch=fetch)
-    sys.stdout.write(render(report, catalog, color=should_use_color(sys.stdout)))
+    reporter = REPORTERS[output_format]
+    if output is None:
+        sys.stdout.write(reporter(report, catalog, color=should_use_color(sys.stdout)))
+    else:
+        try:
+            Path(output).write_text(reporter(report, catalog), encoding="utf-8")
+        except OSError as error:
+            message = catalog.text("cli.cannot_write", path=output, reason=error.strerror)
+            _print_error(message, catalog)
+            return ExitCode.USAGE_ERROR
 
     if fail_on != "never" and report.reaches(Severity(fail_on)):
         return ExitCode.FINDINGS
 
     return ExitCode.OK
+
+
+def _print_error(message: str, catalog: Catalog) -> None:
+    """Write an error the way argparse does; stdout stays reserved for the report."""
+    print(catalog.text("cli.error", prog=PROG, message=message), file=sys.stderr)
 
 
 def _positive_number(catalog: Catalog) -> Callable[[str], float]:
