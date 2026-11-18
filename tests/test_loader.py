@@ -1,11 +1,8 @@
-import contextlib
-import threading
-import time
 from collections.abc import Iterator
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
+from http_server import Route, serve
 
 from a11y_eco.loader import LoadError, detect_encoding, is_url, load
 
@@ -110,42 +107,21 @@ def test_file_larger_than_limit_is_refused(tmp_path: Path) -> None:
         load(str(page), max_bytes=10)
 
 
-ROUTES: dict[str, tuple[int, dict[str, str], bytes]] = {
-    "/page": (200, {"Content-Type": "text/html; charset=utf-8"}, "<p>Café</p>".encode()),
-    "/latin": (200, {"Content-Type": "text/html; charset=iso-8859-1"}, b"<p>Caf\xe9</p>"),
-    "/moved": (301, {"Location": "/page"}, b""),
-    "/missing": (404, {"Content-Type": "text/html"}, b"<h1>Not found</h1>"),
-    "/image": (200, {"Content-Type": "image/png"}, b"\x89PNG"),
+HTML = {"Content-Type": "text/html; charset=utf-8"}
+ROUTES = {
+    "/page": Route("<p>Café</p>".encode(), headers=HTML),
+    "/latin": Route(b"<p>Caf\xe9</p>", headers={"Content-Type": "text/html; charset=iso-8859-1"}),
+    "/moved": Route(status=301, headers={"Location": "/page"}),
+    "/missing": Route(b"<h1>Not found</h1>", status=404, headers=HTML),
+    "/image": Route(b"\x89PNG", headers={"Content-Type": "image/png"}),
+    "/slow": Route(b"<p>Late</p>", headers=HTML, delay=0.5),
 }
-SLOW_RESPONSE_DELAY = 0.5
-
-
-class _Handler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:
-        if self.path == "/slow":
-            time.sleep(SLOW_RESPONSE_DELAY)
-        status, headers, body = ROUTES.get(self.path, ROUTES["/page"])
-        self.send_response(status)
-        for name, value in headers.items():
-            self.send_header(name, value)
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        with contextlib.suppress(OSError):  # the client may have given up (timeout test)
-            self.wfile.write(body)
-
-    def log_message(self, format: str, *args: object) -> None:
-        """Keep the test output quiet."""
 
 
 @pytest.fixture(scope="module")
 def server() -> Iterator[str]:
-    """Serve ROUTES on a free local port and yield its base URL."""
-    httpd = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
-    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
-    thread.start()
-    yield f"http://127.0.0.1:{httpd.server_port}"
-    httpd.shutdown()
-    httpd.server_close()
+    with serve(ROUTES) as base:
+        yield base
 
 
 def test_loads_a_page_from_a_url(server: str) -> None:

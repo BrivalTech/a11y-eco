@@ -1,6 +1,10 @@
+import gc
+import weakref
+
 import pytest
 
-from a11y_eco.dom import parse_html
+from a11y_eco import resources as resources_module
+from a11y_eco.dom import Document, parse_html
 from a11y_eco.resources import Resource, ResourceType, find_resources, is_external
 
 PAGE = "https://www.example.com/blog/post.html"
@@ -153,3 +157,38 @@ def test_is_external(url: str, page: str | None, expected: bool) -> None:
     [resource] = find_resources(document)
 
     assert is_external(resource, document) is expected
+
+
+def test_page_is_walked_once_per_document(monkeypatch: pytest.MonkeyPatch) -> None:
+    walks: list[Document] = []
+    real_walk = resources_module._walk
+
+    def counting_walk(document: Document) -> list[Resource]:
+        walks.append(document)
+        return real_walk(document)
+
+    monkeypatch.setattr(resources_module, "_walk", counting_walk)
+    first, second = parse_html('<img src="a.png">'), parse_html('<img src="a.png">')
+    find_resources(first)
+    find_resources(first)
+    find_resources(second)
+
+    assert walks == [first, second]
+
+
+def test_changing_the_returned_list_does_not_change_the_cache() -> None:
+    document = parse_html('<img src="a.png" alt="">', url=PAGE)
+    find_resources(document).clear()
+
+    assert len(find_resources(document)) == 1
+
+
+def test_cache_does_not_keep_documents_alive() -> None:
+    document = parse_html('<img src="a.png" alt="">')
+    find_resources(document)
+    reference = weakref.ref(document)
+
+    del document
+    gc.collect()
+
+    assert reference() is None

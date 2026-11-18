@@ -204,7 +204,7 @@ class Element:
         return " ".join("".join(parts).split())
 
 
-@dataclass(eq=False, slots=True)
+@dataclass(eq=False, slots=True, weakref_slot=True)
 class Document:
     """A parsed HTML document."""
 

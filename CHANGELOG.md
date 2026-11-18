@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-18
+
+### Changed
+
+- Installation instructions for macOS, whose system Python may be too old.
+- Audits of large pages are about 25 % faster: the resources of a page are now
+  listed once per audit instead of once per rule.
+
 ## [0.1.0] - 2026-11-17
 
 ### Added
@@ -24,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   void elements, source position and original start tag of every element.
 - Browser-like error recovery: omitted end tags (`li`, `p`, `td`, `th`, `tr`, `option`,
   `dt`, `dd`), unclosed elements and stray end tags.
-- - `a11y-eco audit <file|url>` command, with `--fail-on error|warning|info|never`
+- `a11y-eco audit <file|url>` command, with `--fail-on error|warning|info|never`
   and `--timeout`.
 - Page loader for local files and `http`/`https` URLs: browser-like encoding detection
   (byte order mark, `Content-Type` header, `<meta charset>`, Latin-1 read as
@@ -34,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accessible console report: severity always written in full, colours only in an
   interactive terminal, `NO_COLOR` honoured, `file:line:column` positions.
 - Strict type checking with mypy in continuous integration.
-- - `A11Y-IMG-ALT` (RGAA 1.1): images, image map links and image buttons without
+- `A11Y-IMG-ALT` (RGAA 1.1): images, image map links and image buttons without
   a text alternative; decorative images (`alt=""`, `aria-hidden`, `role="presentation"`)
   are accepted.
 - Heading structure rules (RGAA 9.1), covering `h1`–`h6` and `role="heading"`:
@@ -54,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command-line options can no longer be abbreviated (`--fail` for `--fail-on`), so that
   adding an option never breaks existing scripts.
 - pre-commit hooks running Ruff and mypy before each commit, and the tests before each push.
-- - Inventory of the resources referenced by the HTML (stylesheets, scripts, images, fonts,
+- Inventory of the resources referenced by the HTML (stylesheets, scripts, images, fonts,
   audio and video, embedded content), each address counted once, on-demand resources apart.
 - Sobriety measures in the report: requests when the page loads, resources by type,
   resources loaded on demand or served by another host, domains, DOM elements
@@ -66,14 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ECO-WEB-FONTS` (RWEB_0032), `ECO-CANVAS` (RWEB_0055).
 - Messages of findings can show values, such as a count and the recommended maximum.
 - Credits of the RWEB and limits of an automated audit in the README.
-- - Rules on the head of the page: `ECO-VIEWPORT` (RWEB_0004), `ECO-TITLE` and
+- Rules on the head of the page: `ECO-VIEWPORT` (RWEB_0004), `ECO-TITLE` and
   `ECO-META-DESCRIPTION` (RWEB_0011).
 - Known tools recognised by signatures (loaded addresses, inline scripts, CSS classes,
   element names), kept in lists that can grow without changing any rule.
 - Rules on third-party tools and visuals: `ECO-ANALYTICS` (RWEB_0111),
   `ECO-SOCIAL-BUTTONS` (RWEB_0059), `ECO-CAROUSEL` (RWEB_0010), `ECO-ANIMATIONS`
   (RWEB_0009), `ECO-SVG-METADATA` (RWEB_0100).
-- - `A11Y-PAGE-TITLE` (RGAA 8.5): page without a title, or with an empty one, as an error;
+- `A11Y-PAGE-TITLE` (RGAA 8.5): page without a title, or with an empty one, as an error;
   it shares its detection with `ECO-TITLE`.
 - `--fetch-resources`: downloads the page and the files it loads (at most 50, four at a
   time, 10 MB each), announcing gzip and Brotli and counting the transferred bytes
@@ -102,4 +110,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/brivaltech/a11y-eco/compare/v0.1.0...HEAD
+[0.1.1]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/brivaltech/a11y-eco/releases/tag/v0.1.0
