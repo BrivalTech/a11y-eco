@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-18
+
 ### Changed
 
 - Installation instructions for macOS, whose system Python may be too old.
@@ -108,4 +110,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/brivaltech/a11y-eco/compare/v0.1.0...HEAD
+[0.1.1]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/brivaltech/a11y-eco/releases/tag/v0.1.0

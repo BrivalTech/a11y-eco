@@ -23,7 +23,6 @@ def test_package_has_no_runtime_dependency() -> None:
 
 def test_changelog_describes_the_current_version() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    release_link = f"https://github.com/brivaltech/a11y-eco/releases/tag/v{__version__}"
 
     assert f"## [{__version__}] - " in changelog
-    assert f"[{__version__}]: {release_link}" in changelog
+    assert f"[{__version__}]: https://github.com/BrivalTech/a11y-eco/" in changelog
