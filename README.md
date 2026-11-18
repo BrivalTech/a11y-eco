@@ -18,6 +18,14 @@ pipx install a11y-eco        # recommended for a command-line tool
 python -m pip install a11y-eco
 ```
 
+On macOS, the `python3` command provided by the system may be too old. Install a recent
+Python (from [python.org](https://www.python.org/downloads/) or Homebrew), then tell
+pipx which one to use:
+
+```sh
+pipx install --python python3.12 a11y-eco
+```
+
 ## Goals
 
 - Detect the most common accessibility defects in static HTML: missing image alternatives,
