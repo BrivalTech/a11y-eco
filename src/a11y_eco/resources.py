@@ -11,11 +11,13 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import NamedTuple
 from urllib.parse import urljoin, urlsplit
+from weakref import WeakKeyDictionary
 
 from a11y_eco.dom import Document, Element
 from a11y_eco.models import ResourceType
 
 __all__ = ["Resource", "ResourceType", "find_resources", "is_external"]
+_FOUND: WeakKeyDictionary[Document, tuple[Resource, ...]] = WeakKeyDictionary()
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,15 +44,22 @@ class Resource:
 def find_resources(document: Document) -> list[Resource]:
     """List the resources referenced by a page, each address only once.
 
+    The page is walked only the first time; the document must not be changed after.
+
     Args:
         document: The parsed page.
 
     Returns:
         The resources, in the order of their first reference.
     """
+    if document not in _FOUND:
+        _FOUND[document] = tuple(_walk(document))
+    return list(_FOUND[document])
+
+
+def _walk(document: Document) -> list[Resource]:
     base = _base_url(document)
     found: dict[str, Resource] = {}
-
     for element in document.root.iter():
         handler = _HANDLERS.get(element.tag)
 

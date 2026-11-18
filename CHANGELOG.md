@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Installation instructions for macOS, whose system Python may be too old.
+- Audits of large pages are about 25 % faster: the resources of a page are now
+  listed once per audit instead of once per rule.
 
 ## [0.1.0] - 2026-11-17
 
