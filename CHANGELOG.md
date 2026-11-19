@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Resources declared in the CSS of the page are counted: stylesheets imported with
+  `@import` in `<style>`, and images of `style` attributes. Request counts may rise.
+
 ## [0.1.1] - 2026-11-18
 
 ### Changed

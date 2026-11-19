@@ -192,3 +192,44 @@ def test_cache_does_not_keep_documents_alive() -> None:
     gc.collect()
 
     assert reference() is None
+
+
+@pytest.mark.parametrize(
+    ("markup", "expected"),
+    [
+        pytest.param(
+            "<style>@import url(theme.css);</style>",
+            [("https://www.example.com/blog/theme.css", ResourceType.STYLESHEET, False)],
+            id="style-import",
+        ),
+        pytest.param(
+            "<div style=\"background-image: url('/img/banner.jpg')\"></div>",
+            [("https://www.example.com/img/banner.jpg", ResourceType.IMAGE, False)],
+            id="style-attribute",
+        ),
+    ],
+)
+def test_finds_resources_in_the_css_of_the_page(
+    markup: str, expected: list[tuple[str, ResourceType, bool]]
+) -> None:
+    assert summary(markup) == expected
+
+
+@pytest.mark.parametrize(
+    "markup",
+    [
+        pytest.param("<style>.hero { background: url(hero.jpg); }</style>", id="selector"),
+        pytest.param("<style>@font-face { src: url(font.woff2); }</style>", id="font"),
+        pytest.param('<div hidden style="background: url(a.png)"></div>', id="hidden"),
+        pytest.param('<div hidden><p style="background: url(a.png)"></p></div>', id="in-hidden"),
+        pytest.param('<p style="background: url(data:image/png;base64,iVBOR)"></p>', id="data"),
+    ],
+)
+def test_css_references_that_may_not_load_are_left_out(markup: str) -> None:
+    assert resources(markup) == []
+
+
+def test_image_of_a_style_attribute_is_counted_once_with_the_same_img() -> None:
+    markup = '<img src="a.png"><div style="background: url(a.png)"></div>'
+
+    assert summary(markup) == [("https://www.example.com/blog/a.png", ResourceType.IMAGE, False)]
