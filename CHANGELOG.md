@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-19
+
 ### Added
 
 - Resources declared in the CSS of the page are counted: stylesheets imported with
@@ -125,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests on Python 3.14; the smoke test runs a real audit from the built wheel.
 
 
-[Unreleased]: https://github.com/brivaltech/a11y-eco/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/BrivalTech/a11y-eco/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/brivaltech/a11y-eco/releases/tag/v0.1.0
+[0.1.0]: https://github.com/BrivalTech/a11y-eco/releases/tag/v0.1.0

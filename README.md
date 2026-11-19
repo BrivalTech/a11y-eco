@@ -70,8 +70,11 @@ Colours are used only in an interactive terminal, and never when `NO_COLOR` is s
 
 By default, only the HTML of the page is downloaded. With `--fetch-resources`, a11y-eco
 also downloads the page again and the files it loads, at most 50, four at a time, the way
-a browser asks for them: announcing gzip and Brotli, without decompressing anything, so
-that the counted bytes are the bytes really transferred. Nothing is executed.
+a browser asks for them: announcing gzip and Brotli, so that the counted bytes are the
+bytes really transferred. Stylesheets are then read, and the stylesheets they import with
+`@import` are downloaded too, within the same limit. A stylesheet received in Brotli,
+which Python cannot decompress, is requested once more in gzip just to be read; that
+request is not counted. Nothing is executed.
 
 The report then gets a separate "Network measures (real values)" section, and four more
 rules check compression (`RWEB_0076`), cache headers (`RWEB_0075`), cookies on static
@@ -129,10 +132,11 @@ and only the identifiers of the practices and the limits of their validation rul
 
 ## Limits of an automated audit
 
-- Only the HTML sent by the server is read: no JavaScript is run. Stylesheets and
-  scripts are downloaded only with `--fetch-resources`, and are never interpreted:
-  resources loaded by them (fonts declared in CSS, files requested by scripts) stay
-  invisible.
+- Only the HTML sent by the server is read: no JavaScript is run. The CSS of the page is
+  read for the files that always load: stylesheets imported with `@import`, images of
+  `style` attributes, and fonts declared with `@font-face` (counted as loaded on demand).
+  Background images declared in stylesheets are not counted, because they load only when
+  a selector matches; neither are files requested by scripts.
 - Request and resource counts are therefore **minimum values**. An eco-design rule reports
   a problem only when this minimum already exceeds the limit of the practice: a page that
   respects a practice is never reported, but some problems are not detected.
