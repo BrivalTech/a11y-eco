@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resources declared in the CSS of the page are counted: stylesheets imported with
   `@import` in `<style>`, and images of `style` attributes. Request counts may rise.
 - Fonts declared with `@font-face` appear among the resources loaded on demand.
+- With `--fetch-resources`, downloaded stylesheets are read and the stylesheets they
+  import with `@import` are downloaded too, within the same limit of 50 files.
+  Stylesheets received in Brotli are requested again in gzip to be read; that
+  reading request is not counted in the measures.
 
 ### Changed
 
