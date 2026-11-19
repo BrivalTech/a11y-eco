@@ -103,7 +103,9 @@ def font_preloads(count: int) -> str:
 
 
 def font_faces(count: int) -> str:
-    return "<style>" + "@font-face{font-family:F;src:url(f.woff2)}" * count + "</style>"
+    faces = "".join(f"@font-face{{font-family:F{i};src:url(f{i}.woff2)}}" for i in range(count))
+
+    return f"<style>{faces}</style>"
 
 
 GOOGLE_FONTS = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter">'
@@ -117,6 +119,26 @@ GOOGLE_FONTS = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?f
         pytest.param(font_faces(3), [{"count": 3, "limit": 2}], id="3-font-faces"),
         pytest.param(
             font_preloads(2) + font_faces(2) + GOOGLE_FONTS, [], id="counts-are-not-added-up"
+        ),
+        pytest.param(
+            font_preloads(2) + font_faces(2) + GOOGLE_FONTS, [], id="same-files-counted-once"
+        ),
+        pytest.param(
+            font_preloads(2) + "<style>@font-face{src:url(other.woff2)}</style>",
+            [{"count": 3, "limit": 2}],
+            id="different-files-add-up",
+        ),
+        pytest.param(
+            "<style>@font-face{src:url(a.woff2)}@font-face{src:url(a.woff2)}"
+            "@font-face{src:url(a.woff2)}</style>",
+            [],
+            id="one-file-declared-three-times",
+        ),
+        pytest.param(
+            "<style>/* @font-face{src:url(a.woff2)} @font-face{src:url(b.woff2)} */"
+            '@font-face{src:local("Arial")} @font-face{src:url(c.woff2)}</style>',
+            [],
+            id="comments-and-local-fonts-ignored",
         ),
     ],
 )

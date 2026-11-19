@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Resources declared in the CSS of the page are counted: stylesheets imported with
   `@import` in `<style>`, and images of `style` attributes. Request counts may rise.
+- Fonts declared with `@font-face` appear among the resources loaded on demand.
+
+### Changed
+
+- `ECO-WEB-FONTS` reads the `@font-face` rules instead of searching their text:
+  comments and local fonts are ignored, and a font file counts once, even when it is
+  both preloaded and declared.
 
 ## [0.1.1] - 2026-11-18
 

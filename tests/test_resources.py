@@ -207,6 +207,11 @@ def test_cache_does_not_keep_documents_alive() -> None:
             [("https://www.example.com/img/banner.jpg", ResourceType.IMAGE, False)],
             id="style-attribute",
         ),
+        pytest.param(
+            "<style>@font-face { font-family: Inter; src: url(/fonts/inter.woff2); }</style>",
+            [("https://www.example.com/fonts/inter.woff2", ResourceType.FONT, True)],
+            id="font-face-on-demand",
+        ),
     ],
 )
 def test_finds_resources_in_the_css_of_the_page(
@@ -219,7 +224,6 @@ def test_finds_resources_in_the_css_of_the_page(
     "markup",
     [
         pytest.param("<style>.hero { background: url(hero.jpg); }</style>", id="selector"),
-        pytest.param("<style>@font-face { src: url(font.woff2); }</style>", id="font"),
         pytest.param('<div hidden style="background: url(a.png)"></div>', id="hidden"),
         pytest.param('<div hidden><p style="background: url(a.png)"></p></div>', id="in-hidden"),
         pytest.param('<p style="background: url(data:image/png;base64,iVBOR)"></p>', id="data"),

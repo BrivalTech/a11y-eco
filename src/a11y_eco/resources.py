@@ -1,9 +1,10 @@
 """Inventory of the resources that a page asks the browser to download.
 
-The HTML is read, with the CSS it contains: stylesheets imported by ``<style>`` and
-images of ``style`` attributes. Background images declared in stylesheets are left
-out, because they are only downloaded when a selector matches; so are files requested
-by scripts. Every count based on this inventory is therefore a minimum.
+The HTML is read, with the CSS it contains: stylesheets imported by ``<style>``,
+fonts of its ``@font-face`` rules (loaded on demand, when a text uses them) and images
+of ``style`` attributes. Background images declared in stylesheets are left out,
+because they are only downloaded when a selector matches; so are files requested by
+scripts. Every count based on this inventory is therefore a minimum.
 """
 
 from __future__ import annotations
@@ -205,8 +206,13 @@ def _frame(element: Element) -> Iterator[_Reference]:
 
 
 def _style(element: Element) -> Iterator[_Reference]:
-    for url in read_css(element.text_content()).imports:
+    css = read_css(element.text_content())
+
+    for url in css.imports:
         yield _Reference(url, ResourceType.STYLESHEET, deferred=False)
+
+    for url in css.font_faces:
+        yield _Reference(url, ResourceType.FONT, deferred=True)
 
 
 def _style_attribute(element: Element) -> Iterator[_Reference]:
