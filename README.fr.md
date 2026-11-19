@@ -73,8 +73,11 @@ Les couleurs ne sont utilisées que dans un terminal interactif, et jamais quand
 
 Par défaut, seul le HTML de la page est téléchargé. Avec `--fetch-resources`, a11y-eco
 télécharge aussi de nouveau la page et les fichiers qu'elle charge, 50 au plus, quatre à
-la fois, comme un navigateur : en annonçant gzip et Brotli, sans rien décompresser, afin
-que les octets comptés soient ceux réellement transférés. Rien n'est exécuté.
+la fois, comme un navigateur : en annonçant gzip et Brotli, afin que les octets comptés
+soient ceux réellement transférés. Les feuilles de style sont ensuite lues, et celles
+qu'elles importent avec `@import` sont téléchargées à leur tour, dans la même limite. Une
+feuille reçue en Brotli, que Python ne sait pas décompresser, est redemandée une fois en
+gzip uniquement pour être lue ; cette requête n'est pas comptée. Rien n'est exécuté.
 
 Le rapport comporte alors une section séparée « Mesures réseau (valeurs réelles) », et
 quatre règles supplémentaires vérifient la compression (`RWEB_0076`), les en-têtes de
@@ -137,10 +140,12 @@ sont utilisés.
 
 ## Limites d'un audit automatique
 
-- Seul le HTML envoyé par le serveur est lu : aucun JavaScript n'est exécuté. Les
-  feuilles de style et les scripts ne sont téléchargés qu'avec `--fetch-resources`, et ne
-  sont jamais interprétés : les ressources qu'ils chargent (polices déclarées en CSS,
-  fichiers demandés par un script) restent invisibles.
+- Seul le HTML envoyé par le serveur est lu : aucun JavaScript n'est exécuté. Le CSS de
+  la page est lu pour les fichiers toujours chargés : feuilles importées avec `@import`,
+  images des attributs `style`, et polices déclarées avec `@font-face` (comptées comme
+  chargées à la demande). Les images de fond déclarées dans les feuilles ne sont pas
+  comptées, car elles ne se chargent que si un sélecteur correspond ; les fichiers
+  demandés par des scripts non plus.
 - Les nombres de requêtes et de ressources sont donc des **valeurs minimales**. Une règle
   d'éco-conception ne signale un problème que si ce minimum dépasse déjà le seuil de la
   bonne pratique : une page qui la respecte n'est jamais signalée, mais certains problèmes

@@ -9,6 +9,9 @@ from a11y_eco.loader import USER_AGENT
 from a11y_eco.models import Download
 from a11y_eco.network import (
     ACCEPT_ENCODING,
+    MAX_DOWNLOAD_BYTES,
+    READABLE_ENCODING,
+    _inflate,
     download,
     download_all,
     fetch_resources,
@@ -158,3 +161,77 @@ def test_fetch_resources_respects_the_limit(server: str) -> None:
     )
 
     assert (network.requests, network.skipped, network.complete) == (4, 7, False)
+
+
+GZIP = {"Content-Type": "text/css", "Content-Encoding": "gzip"}
+FAKE_BROTLI = b"\x1b\x03\x00\x00brotli bytes that only a browser can read"
+CSS_SITE = {
+    "/index.html": Route(b"<p>Page</p>", headers={"Content-Type": "text/html"}),
+    "/theme.css": Route(gzip.compress(b'@import url("parts/base.css"); body {}'), headers=GZIP),
+    "/parts/base.css": Route(b'@import "../theme.css"; @import url(fonts.css);'),
+    "/parts/fonts.css": Route(b"/* no import */"),
+    "/brotli.css": Route(
+        FAKE_BROTLI,
+        headers={"Content-Encoding": "br"},
+        negotiated={READABLE_ENCODING: Route(gzip.compress(b'@import "late.css";'), headers=GZIP)},
+    ),
+    "/late.css": Route(b"p {}"),
+    "/cdn-import.css": Route(b"@import url(https://cdn.example.net/x.css);"),
+}
+
+
+@pytest.fixture(scope="module")
+def css_site() -> Iterator[str]:
+    with serve(CSS_SITE) as base:
+        yield base
+
+
+def fetch(css_site: str, stylesheet: str, limit: int = 50) -> list[str]:
+    """Fetch a page that links one stylesheet; return the downloaded paths."""
+    page = parse_html(f'<link rel="stylesheet" href="{stylesheet}">', url=f"{css_site}/index.html")
+    network = fetch_resources(page, include_external=False, timeout=2, limit=limit)
+
+    return [download.url.removeprefix(css_site) for download in network.downloads]
+
+
+def test_imports_are_followed_wave_after_wave(css_site: str) -> None:
+    assert fetch(css_site, "/theme.css") == [
+        "/index.html",
+        "/theme.css",
+        "/parts/base.css",
+        "/parts/fonts.css",
+    ]
+
+
+def test_stylesheet_measured_in_brotli_is_read_again_in_gzip(css_site: str) -> None:
+    page = parse_html('<link rel="stylesheet" href="/brotli.css">', url=f"{css_site}/index.html")
+    REQUESTS.clear()
+
+    network = fetch_resources(page, include_external=False, timeout=2)
+    brotli = network.downloads[1]
+
+    assert brotli.transferred == len(FAKE_BROTLI)  # the measure keeps the Brotli size
+    assert network.downloads[2].url == f"{css_site}/late.css"
+    assert network.requests == 3  # the reading request is not counted
+    assert [r["Accept-Encoding"] for r in REQUESTS].count(READABLE_ENCODING) == 1
+
+
+def test_imports_from_other_hosts_are_not_followed_by_default(css_site: str) -> None:
+    assert fetch(css_site, "/cdn-import.css") == ["/index.html", "/cdn-import.css"]
+
+
+def test_imports_count_toward_the_limit(css_site: str) -> None:
+    page = parse_html('<link rel="stylesheet" href="/theme.css">', url=f"{css_site}/index.html")
+    network = fetch_resources(page, include_external=False, timeout=2, limit=3)
+
+    assert (network.requests, network.skipped, network.complete) == (3, 1, False)
+
+
+def test_decompression_stops_at_the_size_limit() -> None:
+    bomb = gzip.compress(bytes(MAX_DOWNLOAD_BYTES + 1000))  # about 10 KB, expands to 10 MB
+
+    assert len(_inflate(bomb)) == MAX_DOWNLOAD_BYTES
+
+
+def test_damaged_compressed_data_gives_nothing() -> None:
+    assert _inflate(b"not gzip at all") == b""

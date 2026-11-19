@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-19
+
+### Added
+
+- Resources declared in the CSS of the page are counted: stylesheets imported with
+  `@import` in `<style>`, and images of `style` attributes. Request counts may rise.
+- Fonts declared with `@font-face` appear among the resources loaded on demand.
+- With `--fetch-resources`, downloaded stylesheets are read and the stylesheets they
+  import with `@import` are downloaded too, within the same limit of 50 files.
+  Stylesheets received in Brotli are requested again in gzip to be read; that
+  reading request is not counted in the measures.
+
+### Changed
+
+- `ECO-WEB-FONTS` reads the `@font-face` rules instead of searching their text:
+  comments and local fonts are ignored, and a font file counts once, even when it is
+  both preloaded and declared.
+
 ## [0.1.1] - 2026-11-18
 
 ### Changed
@@ -109,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests on Python 3.14; the smoke test runs a real audit from the built wheel.
 
 
-[Unreleased]: https://github.com/brivaltech/a11y-eco/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/BrivalTech/a11y-eco/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/brivaltech/a11y-eco/releases/tag/v0.1.0
+[0.1.0]: https://github.com/BrivalTech/a11y-eco/releases/tag/v0.1.0

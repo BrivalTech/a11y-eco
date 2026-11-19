@@ -22,6 +22,9 @@ class Route:
     delay: float = 0.0
     """Seconds to wait before answering, to test timeouts."""
 
+    negotiated: Mapping[str, Route] = field(default_factory=dict)
+    """Other answers, chosen by the exact Accept-Encoding header of the request."""
+
 
 @contextlib.contextmanager
 def serve(routes: Mapping[str, Route]) -> Iterator[str]:
@@ -34,6 +37,7 @@ def serve(routes: Mapping[str, Route]) -> Iterator[str]:
         def do_GET(self) -> None:
             REQUESTS.append(dict(self.headers.items()))
             route = routes.get(self.path, Route(status=404))
+            route = route.negotiated.get(self.headers.get("Accept-Encoding", ""), route)
             time.sleep(route.delay)
             self.send_response(route.status)
             for name, value in route.headers.items():

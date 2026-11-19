@@ -84,17 +84,16 @@ def gif_image(document: Document) -> Iterator[Element]:
 @rule("ECO-WEB-FONTS", severity=Severity.INFO, reference="RWEB_0032")
 def too_many_web_fonts(document: Document) -> Iterator[Violation]:
     """The page should not download more than 2 fonts."""
-    at_load = [resource for resource in find_resources(document) if not resource.deferred]
-    preloaded = sum(1 for resource in at_load if resource.type is ResourceType.FONT)
+    resources = find_resources(document)
+    files = sum(1 for resource in resources if resource.type is ResourceType.FONT)
     services = sum(
         1
-        for resource in at_load
-        if resource.type is ResourceType.STYLESHEET and resource.host in FONT_SERVICES
+        for resource in resources
+        if resource.type is ResourceType.STYLESHEET
+        and not resource.deferred
+        and resource.host in FONT_SERVICES
     )
-    declared = sum(
-        style.text_content().lower().count("@font-face") for style in document.find_all("style")
-    )
-    fonts = max(preloaded, services, declared)
+    fonts = max(files, services)
     if fonts > MAX_FONTS:
         yield Violation(document.root, {"count": fonts, "limit": MAX_FONTS})
 
