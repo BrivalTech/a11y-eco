@@ -80,9 +80,10 @@ feuille reçue en Brotli, que Python ne sait pas décompresser, est redemandée 
 gzip uniquement pour être lue ; cette requête n'est pas comptée. Rien n'est exécuté.
 
 Le rapport comporte alors une section séparée « Mesures réseau (valeurs réelles) », et
-quatre règles supplémentaires vérifient la compression (`RWEB_0076`), les en-têtes de
-cache (`RWEB_0075`), les cookies sur les fichiers statiques (`RWEB_0081`) et les
-redirections (`RWEB_0112`).
+cinq règles supplémentaires vérifient la compression (`RWEB_0076`), les en-têtes de
+cache (`RWEB_0075`), les cookies sur les fichiers statiques (`RWEB_0081`), les
+redirections (`RWEB_0112`) et les images bien plus grandes que leur affichage
+(`RWEB_0048`).
 
 Les fichiers des autres hôtes (CDN, polices, mesure d'audience, publicité) sont exclus,
 sauf avec `--include-external` : les télécharger révèle votre adresse IP à ces tiers. Un
@@ -158,6 +159,10 @@ sont utilisés.
   liste n'est pas détecté.
 - Les règles réseau ne voient que les réponses des serveurs : les cookies déposés par
   JavaScript ne sont pas détectés, et une chaîne de redirections compte pour une seule.
+- La taille d'affichage d'une image est lue dans les attributs `width` et `height` de son
+  `<img>`, que le CSS peut modifier : `ECO-IMAGE-SIZE` est une indication (sévérité
+  `info`). Elle tient compte des écrans haute densité, écarte les images responsives
+  (`srcset`, `<picture>`) et ne lit que les fichiers PNG, GIF, JPEG et WebP.
 
 ## Développement
 
