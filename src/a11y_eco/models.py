@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import NamedTuple
 
 
 class Severity(StrEnum):
@@ -93,6 +94,18 @@ class Metrics:
 
     dom_elements: int = 0
     """Number of elements in the page."""
+
+
+class ImageSize(NamedTuple):
+    """Dimensions of an image file, in pixels."""
+
+    width: int
+    height: int
+
+    @property
+    def pixels(self) -> int:
+        """Number of pixels of the image."""
+        return self.width * self.height
 
 
 @dataclass(frozen=True, slots=True)
