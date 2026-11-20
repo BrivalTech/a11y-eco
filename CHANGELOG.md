@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ECO-IMAGE-SIZE` (RWEB_0048), with `--fetch-resources`: images much larger than the
+  `width` and `height` of their `<img>`, beyond what high-density screens need, when
+  the bytes downloaded for nothing exceed 5 % of the page. Responsive images are left out.
+- The dimensions of downloaded images (PNG, GIF, JPEG, WebP) are read, and appear in
+  the JSON report as `image_size`.
+
 ## [0.2.0] - 2026-11-19
 
 ### Added

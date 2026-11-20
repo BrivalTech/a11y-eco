@@ -176,6 +176,10 @@ CATALOG = Catalog(
             "Static files should come from at most one domain that uses cookies."
         ),
         "about.ECO-REDIRECTS": "Loading the page should not go through more than one redirection.",
+        "about.ECO-IMAGE-SIZE": (
+            "Images should not be much larger than their display size, high-density "
+            "screens included."
+        ),
         "html.description": "Accessibility and eco-design audit report produced by a11y-eco",
         "html.findings": "Problems found",
         "html.finding": "{severity}: {message}",
@@ -239,5 +243,11 @@ CATALOG = Catalog(
             "Static files served with cookies by {count} domains (recommended maximum: {limit})"
         ),
         "rule.ECO-REDIRECTS": "Redirection, one of {count} (recommended maximum: {limit})",
+        "rule.ECO-IMAGE-SIZE": (
+            "Image of {width}\N{NO-BREAK SPACE}\N{MULTIPLICATION SIGN}\N{NO-BREAK SPACE}"
+            "{height}\N{NO-BREAK SPACE}px for a display of {shown_width}\N{NO-BREAK SPACE}"
+            "\N{MULTIPLICATION SIGN}\N{NO-BREAK SPACE}{shown_height}\N{NO-BREAK SPACE}px: "
+            "about {wasted} bytes downloaded for nothing"
+        ),
     },
 )

@@ -61,7 +61,7 @@ def find_resources(document: Document) -> list[Resource]:
 
 
 def _walk(document: Document) -> list[Resource]:
-    base = _base_url(document)
+    base = base_url(document)
     found: dict[str, Resource] = {}
     for element in document.root.iter():
         for reference in _references(element):
@@ -130,7 +130,7 @@ def _is_lazy(element: Element) -> bool:
     return _attribute(element, "loading").lower() == "lazy"
 
 
-def _base_url(document: Document) -> str | None:
+def base_url(document: Document) -> str | None:
     """Address against which relative URLs are resolved: <base href>, then the page."""
     base = document.root.find("base")
     href = _attribute(base, "href") if base is not None else ""

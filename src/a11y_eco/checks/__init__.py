@@ -57,6 +57,7 @@ NETWORK_RULES: tuple[NetworkRule, ...] = (
     transfer.missing_cache_headers,
     transfer.static_files_with_cookies,
     transfer.too_many_redirects,
+    transfer.oversized_images,
 )
 
 ALL_RULES: tuple[Rule | NetworkRule, ...] = (*RULES, *NETWORK_RULES)
