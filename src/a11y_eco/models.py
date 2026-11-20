@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import NamedTuple
 
 
 class Severity(StrEnum):
@@ -95,6 +96,18 @@ class Metrics:
     """Number of elements in the page."""
 
 
+class ImageSize(NamedTuple):
+    """Dimensions of an image file, in pixels."""
+
+    width: int
+    height: int
+
+    @property
+    def pixels(self) -> int:
+        """Number of pixels of the image."""
+        return self.width * self.height
+
+
 @dataclass(frozen=True, slots=True)
 class Download:
     """What happened when downloading one address."""
@@ -115,6 +128,9 @@ class Download:
 
     headers: Mapping[str, str] = field(default_factory=dict, hash=False)
     """Response headers, names in lowercase; a repeated header has one value per line."""
+
+    image_size: ImageSize | None = None
+    """Dimensions read from the file, when it is an image in a format that can be read."""
 
     @property
     def ok(self) -> bool:

@@ -76,9 +76,10 @@ bytes really transferred. Stylesheets are then read, and the stylesheets they im
 which Python cannot decompress, is requested once more in gzip just to be read; that
 request is not counted. Nothing is executed.
 
-The report then gets a separate "Network measures (real values)" section, and four more
+The report then gets a separate "Network measures (real values)" section, and five more
 rules check compression (`RWEB_0076`), cache headers (`RWEB_0075`), cookies on static
-files (`RWEB_0081`) and redirections (`RWEB_0112`).
+files (`RWEB_0081`), redirections (`RWEB_0112`) and images much larger than their
+display (`RWEB_0048`).
 
 Files from other hosts (CDN, fonts, analytics, ads) are left out unless
 `--include-external` is added: downloading them shows your IP address to those third
@@ -146,6 +147,10 @@ and only the identifiers of the practices and the limits of their validation rul
   recognised from a list of known tools: a tool missing from the list is not detected.
 - Network rules see the answers of the servers only: cookies set by JavaScript are not
   detected, and a chain of redirections counts as one.
+- The displayed size of an image is read from the `width` and `height` of its `<img>`,
+  which CSS may change: `ECO-IMAGE-SIZE` is a hint (severity `info`). It allows for
+  high-density screens, leaves responsive images (`srcset`, `<picture>`) out, and reads
+  PNG, GIF, JPEG and WebP files only.
 
 ## Development
 

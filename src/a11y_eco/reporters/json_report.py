@@ -96,4 +96,9 @@ def _download(download: Download) -> dict[str, Any]:
         "transferred": download.transferred,
         "complete": download.complete,
         "redirected": download.redirected,
+        "image_size": (
+            {"width": download.image_size.width, "height": download.image_size.height}
+            if download.image_size
+            else None
+        ),
     }

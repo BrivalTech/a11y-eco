@@ -90,32 +90,33 @@ class NetworkViolation(NamedTuple):
     details: Mapping[str, int]
 
 
-NetworkCheckFunction = Callable[[NetworkMetrics], Iterable[Download | NetworkViolation]]
+NetworkCheckFunction = Callable[[NetworkMetrics, Document], Iterable[Download | NetworkViolation]]
 
 
 @dataclass(frozen=True, slots=True)
 class NetworkRule:
-    """An audit rule that reads the downloads instead of the HTML."""
+    """An audit rule that reads the downloads, and the HTML when it needs to."""
 
     rule_id: str
     severity: Severity
     reference: str
     check: NetworkCheckFunction
 
-    def run(self, network: NetworkMetrics) -> list[Finding]:
+    def run(self, network: NetworkMetrics, document: Document) -> list[Finding]:
         """Run the check and turn every faulty download into a finding.
 
         A download has no position in the HTML: its address is the snippet.
 
         Args:
             network: The downloads of the page.
+            document: The parsed page.
 
         Returns:
             The findings, in download order.
         """
         findings = []
 
-        for result in self.check(network):
+        for result in self.check(network, document):
             violation = (
                 result if isinstance(result, NetworkViolation) else NetworkViolation(result, {})
             )

@@ -2,10 +2,13 @@ import pytest
 
 from a11y_eco.checks import transfer
 from a11y_eco.checks.base import NetworkRule
-from a11y_eco.models import Download, NetworkMetrics
+from a11y_eco.dom import parse_html
+from a11y_eco.models import Download, ImageSize, NetworkMetrics
 
 CSS = {"content-type": "text/css; charset=utf-8", "cache-control": "max-age=3600"}
 BIG = transfer.MIN_COMPRESSIBLE_BYTES
+ANY_PAGE = parse_html("", url="https://www.example.com/")
+SITE = "https://www.example.com/"
 
 
 def file(url: str = "https://www.example.com/a.css", **headers: str) -> Download:
@@ -15,11 +18,12 @@ def file(url: str = "https://www.example.com/a.css", **headers: str) -> Download
 
 def run(rule: NetworkRule, *downloads: Download) -> list[str]:
     """Return the addresses reported by a rule."""
-    return [finding.snippet for finding in rule.run(NetworkMetrics(downloads=downloads))]
+    return [finding.snippet for finding in rule.run(NetworkMetrics(downloads=downloads), ANY_PAGE)]
 
 
 def details(rule: NetworkRule, *downloads: Download) -> list[dict[str, int]]:
-    return [dict(finding.details) for finding in rule.run(NetworkMetrics(downloads=downloads))]
+    findings = rule.run(NetworkMetrics(downloads=downloads), ANY_PAGE)
+    return [dict(finding.details) for finding in findings]
 
 
 @pytest.mark.parametrize(
@@ -110,3 +114,60 @@ def test_every_redirection_is_reported_beyond_the_limit() -> None:
         "https://example.com/a",
     ]
     assert details(transfer.too_many_redirects, *downloads) == [{"count": 2, "limit": 1}] * 2
+
+
+def image(name: str, width: int, height: int, transferred: int = 41_000) -> Download:
+    size = ImageSize(width, height)
+
+    return Download(f"{SITE}{name}", status=200, transferred=transferred, image_size=size)
+
+
+def oversized(markup: str, *downloads: Download) -> list[dict[str, int]]:
+    """Return the details of the images reported on a page."""
+    page = parse_html(markup, url=SITE)
+    findings = transfer.oversized_images.run(NetworkMetrics(downloads=downloads), page)
+
+    return [dict(finding.details) for finding in findings]
+
+
+def test_thumbnail_of_a_large_image_is_reported() -> None:
+    details = oversized('<img src="a.png" width="70" height="60">', image("a.png", 350, 300))
+
+    assert details == [
+        {"width": 350, "height": 300, "shown_width": 70, "shown_height": 60, "wasted": 34_440}
+    ]
+
+
+@pytest.mark.parametrize(
+    "markup",
+    [
+        pytest.param('<img src="a.png" width="175" height="150">', id="high-density-screen"),
+        pytest.param('<img src="a.png">', id="size-unknown"),
+        pytest.param('<img src="a.png" width="70">', id="height-unknown"),
+        pytest.param('<img src="a.png" width="20%" height="60">', id="not-in-pixels"),
+        pytest.param(
+            '<img src="a.png" width="70" height="60" srcset="a.png 350w">', id="responsive"
+        ),
+        pytest.param(
+            '<picture><img src="a.png" width="70" height="60"></picture>', id="in-picture"
+        ),
+        pytest.param(
+            '<img src="a.png" width="70" height="60"><img src="a.png" width="350" height="300">',
+            id="also-shown-large",
+        ),
+        pytest.param(
+            '<img src="a.png" width="70" height="60"><img src="a.png">',
+            id="also-shown-at-unknown-size",
+        ),
+        pytest.param('<img src="b.png" width="70" height="60">', id="not-downloaded"),
+    ],
+)
+def test_images_that_may_be_shown_at_their_size_are_not_reported(markup: str) -> None:
+    assert oversized(markup, image("a.png", 350, 300)) == []
+
+
+def test_waste_below_five_percent_of_the_page_is_tolerated() -> None:
+    markup = '<img src="a.png" width="70" height="60">'
+    heavy_video = Download(f"{SITE}film.mp4", status=200, transferred=1_000_000)
+
+    assert oversized(markup, image("a.png", 350, 300), heavy_video) == []

@@ -1,12 +1,14 @@
 import gzip
+import struct
 from collections.abc import Iterator
 
 import pytest
 from http_server import REQUESTS, Route, serve
 
 from a11y_eco.dom import parse_html
+from a11y_eco.imagesize import PNG_SIGNATURE
 from a11y_eco.loader import USER_AGENT
-from a11y_eco.models import Download
+from a11y_eco.models import Download, ImageSize
 from a11y_eco.network import (
     ACCEPT_ENCODING,
     MAX_DOWNLOAD_BYTES,
@@ -19,6 +21,7 @@ from a11y_eco.network import (
 )
 
 CSS = b"body { color: black; }\n" * 100
+PHOTO = PNG_SIGNATURE + struct.pack(">I4sII", 13, b"IHDR", 1280, 960) + bytes(5000)
 ROUTES = {
     "/plain.css": Route(CSS, headers={"Content-Type": "text/css"}),
     "/packed.css": Route(gzip.compress(CSS), headers={"Content-Encoding": "gzip"}),
@@ -26,6 +29,7 @@ ROUTES = {
     "/cookies.js": Route(b"x", headers={"Set-Cookie": "a=1", "set-cookie": "b=2"}),
     "/broken.js": Route(b"error", status=500),
     "/slow.js": Route(b"x", delay=0.5),
+    "/photo.png": Route(PHOTO, headers={"Content-Type": "image/png"}),
 }
 
 
@@ -55,6 +59,14 @@ def test_follows_redirections_and_reports_them(server: str) -> None:
     result = download(f"{server}/moved.css", timeout=2)
 
     assert (result.status, result.redirected, result.ok) == (200, True, True)
+
+
+def test_reads_the_dimensions_of_downloaded_images(server: str) -> None:
+    photo = download(f"{server}/photo.png", timeout=2)
+    stylesheet = download(f"{server}/plain.css", timeout=2)
+
+    assert (photo.image_size, photo.transferred) == (ImageSize(1280, 960), len(PHOTO))
+    assert stylesheet.image_size is None
 
 
 def test_keeps_every_value_of_a_repeated_header(server: str) -> None:

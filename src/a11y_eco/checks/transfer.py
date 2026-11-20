@@ -1,21 +1,25 @@
 """Rules about what really travels on the network (RWEB), with --fetch-resources.
 
-They read the responses of the servers: compression, cache headers, cookies and
-redirections. Cookies set by JavaScript are invisible here, and urllib reports a
-chain of redirections as one: the counts are minimum values.
+They read the responses of the servers: compression, cache headers, cookies,
+redirections and the dimensions of images. Cookies set by JavaScript are invisible
+here, and urllib reports a chain of redirections as one: the counts are minimum values.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from urllib.parse import urlsplit
+from collections.abc import Collection, Iterator
+from urllib.parse import urljoin, urlsplit
 
 from a11y_eco.checks.base import NetworkViolation, network_rule
-from a11y_eco.models import Download, NetworkMetrics, Severity
+from a11y_eco.dom import Document, Element
+from a11y_eco.models import Download, ImageSize, NetworkMetrics, Severity
+from a11y_eco.resources import base_url
 
 MAX_COOKIE_DOMAINS = 1
 MAX_REDIRECTS = 1
 MIN_COMPRESSIBLE_BYTES = 1024
+MAX_WASTED_SHARE = 0.05
+SCREEN_DENSITY = 2
 _TEXT_TYPES = frozenset(
     {
         "text/html",
@@ -29,7 +33,7 @@ _TEXT_TYPES = frozenset(
 
 
 @network_rule("ECO-COMPRESSION", severity=Severity.WARNING, reference="RWEB_0076")
-def uncompressed_text(network: NetworkMetrics) -> Iterator[Download]:
+def uncompressed_text(network: NetworkMetrics, document: Document) -> Iterator[Download]:
     """HTML, CSS, JavaScript and SVG files should be sent compressed (gzip, Brotli…)."""
     for download in network.downloads:
         encoding = download.headers.get("content-encoding", "identity").strip().lower()
@@ -43,7 +47,7 @@ def uncompressed_text(network: NetworkMetrics) -> Iterator[Download]:
 
 
 @network_rule("ECO-CACHE-HEADERS", severity=Severity.WARNING, reference="RWEB_0075")
-def missing_cache_headers(network: NetworkMetrics) -> Iterator[Download]:
+def missing_cache_headers(network: NetworkMetrics, document: Document) -> Iterator[Download]:
     """Static files should say how long to keep them, with Expires or Cache-Control."""
     for download in network.downloads:
         if (
@@ -55,7 +59,9 @@ def missing_cache_headers(network: NetworkMetrics) -> Iterator[Download]:
 
 
 @network_rule("ECO-COOKIE-DOMAINS", severity=Severity.WARNING, reference="RWEB_0081")
-def static_files_with_cookies(network: NetworkMetrics) -> Iterator[NetworkViolation]:
+def static_files_with_cookies(
+    network: NetworkMetrics, document: Document
+) -> Iterator[NetworkViolation]:
     """Static files should come from at most one domain that uses cookies.
 
     A domain uses cookies as soon as one of its responses sets one: the browser then
@@ -75,7 +81,7 @@ def static_files_with_cookies(network: NetworkMetrics) -> Iterator[NetworkViolat
 
 
 @network_rule("ECO-REDIRECTS", severity=Severity.WARNING, reference="RWEB_0112")
-def too_many_redirects(network: NetworkMetrics) -> Iterator[NetworkViolation]:
+def too_many_redirects(network: NetworkMetrics, document: Document) -> Iterator[NetworkViolation]:
     """Loading the page should not go through more than one redirection."""
     redirected = [download for download in network.downloads if download.redirected]
 
@@ -83,6 +89,86 @@ def too_many_redirects(network: NetworkMetrics) -> Iterator[NetworkViolation]:
         details = {"count": len(redirected), "limit": MAX_REDIRECTS}
         for download in redirected:
             yield NetworkViolation(download, details)
+
+
+@network_rule("ECO-IMAGE-SIZE", severity=Severity.INFO, reference="RWEB_0048")
+def oversized_images(network: NetworkMetrics, document: Document) -> Iterator[NetworkViolation]:
+    """Images should not be much larger than the size they are displayed at.
+
+    The displayed size is read from the width and height attributes of <img>, which
+    CSS may change: a heuristic, hence the "info" severity. Responsive images (srcset,
+    <picture>) let the browser choose their file, and are left out.
+    """
+    files = {d.url: (d, d.image_size) for d in network.downloads if d.ok and d.image_size}
+    wasted: list[tuple[Download, ImageSize, ImageSize, int]] = []
+
+    for url, display in _largest_displays(document, files).items():
+        file, size = files[url]
+        useful = display.pixels * SCREEN_DENSITY**2
+        if size.pixels > useful:
+            # The bytes in excess, in proportion to the pixels in excess.
+            wasted.append(
+                (file, size, display, round(file.transferred * (1 - useful / size.pixels)))
+            )
+
+    if sum(waste for *_, waste in wasted) <= MAX_WASTED_SHARE * network.transferred:
+        return
+
+    for file, size, display, waste in wasted:
+        details = {
+            "width": size.width,
+            "height": size.height,
+            "shown_width": display.width,
+            "shown_height": display.height,
+            "wasted": waste,
+        }
+        yield NetworkViolation(file, details)
+
+
+def _largest_displays(document: Document, files: Collection[str]) -> dict[str, ImageSize]:
+    """Find the largest declared display of each downloaded image.
+
+    An image shown at several sizes is judged by the largest one, and an image with
+    one display of unknown size is left out: it may well be shown large there.
+    """
+    base = base_url(document)
+    displays: dict[str, ImageSize | None] = {}
+
+    for img in document.find_all("img"):
+        src = (img.get("src") or "").strip()
+        url = urljoin(base, src) if base else src
+        if not src or url not in files:
+            continue
+        declared = _declared_size(img)
+        if url not in displays:
+            displays[url] = declared
+            continue
+        known = displays[url]
+        if known is not None:  # None stays None: one unknown display is enough
+            displays[url] = None if declared is None else max(known, declared, key=_pixels)
+
+    return {url: size for url, size in displays.items() if size is not None}
+
+
+def _pixels(size: ImageSize) -> int:
+    return size.pixels
+
+
+def _declared_size(img: Element) -> ImageSize | None:
+    """Read the width and height attributes, unless the image is responsive."""
+    responsive = img.has("srcset") or (img.parent is not None and img.parent.tag == "picture")
+    width, height = (_positive_integer(img.get(name)) for name in ("width", "height"))
+
+    if responsive or width is None or height is None:
+        return None
+
+    return ImageSize(width, height)
+
+
+def _positive_integer(value: str | None) -> int | None:
+    value = (value or "").strip()
+
+    return int(value) if value.isdigit() and int(value) > 0 else None
 
 
 def _media_type(download: Download) -> str:

@@ -2,7 +2,7 @@
 
 <!-- Généré par `a11y-eco rules --format markdown --lang fr` : ne pas modifier à la main. -->
 
-33 règles.
+34 règles.
 
 ## Accessibilité (RGAA)
 
@@ -51,3 +51,4 @@
 | `ECO-CACHE-HEADERS` | avertissement | RWEB_0075 | Les fichiers statiques devraient indiquer combien de temps les garder, avec Expires ou Cache-Control. |
 | `ECO-COOKIE-DOMAINS` | avertissement | RWEB_0081 | Les fichiers statiques devraient venir d'au plus un domaine qui utilise des cookies. |
 | `ECO-REDIRECTS` | avertissement | RWEB_0112 | Le chargement de la page ne devrait pas passer par plus d'une redirection. |
+| `ECO-IMAGE-SIZE` | info | RWEB_0048 | Les images ne devraient pas être beaucoup plus grandes que leur taille d'affichage, écrans haute densité compris. |

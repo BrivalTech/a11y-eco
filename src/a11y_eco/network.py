@@ -20,6 +20,7 @@ from urllib.request import Request, urlopen
 
 from a11y_eco.css import read_css
 from a11y_eco.dom import Document
+from a11y_eco.imagesize import HEADER_BYTES, image_size
 from a11y_eco.loader import USER_AGENT
 from a11y_eco.models import Download, NetworkMetrics, ResourceType
 from a11y_eco.resources import find_resources, is_external
@@ -150,6 +151,7 @@ def _transfer(
                 complete=len(body) <= max_bytes,
                 redirected=response.url != url,
                 headers=_lowercase_headers(response.headers),
+                image_size=image_size(body[:HEADER_BYTES]),
             )
             return result, body[:max_bytes]
     except HTTPError as error:

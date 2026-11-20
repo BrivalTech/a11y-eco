@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-20
+
+### Added
+
+- `ECO-IMAGE-SIZE` (RWEB_0048), with `--fetch-resources`: images much larger than the
+  `width` and `height` of their `<img>`, beyond what high-density screens need, when
+  the bytes downloaded for nothing exceed 5 % of the page. Responsive images are left out.
+- The dimensions of downloaded images (PNG, GIF, JPEG, WebP) are read, and appear in
+  the JSON report as `image_size`.
+
 ## [0.2.0] - 2026-11-19
 
 ### Added
@@ -127,7 +137,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests on Python 3.14; the smoke test runs a real audit from the built wheel.
 
 
-[Unreleased]: https://github.com/BrivalTech/a11y-eco/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/BrivalTech/a11y-eco/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/BrivalTech/a11y-eco/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/BrivalTech/a11y-eco/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/BrivalTech/a11y-eco/releases/tag/v0.1.0

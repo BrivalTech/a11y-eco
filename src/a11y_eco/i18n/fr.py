@@ -203,6 +203,10 @@ CATALOG = Catalog(
         "about.ECO-REDIRECTS": (
             "Le chargement de la page ne devrait pas passer par plus d'une redirection."
         ),
+        "about.ECO-IMAGE-SIZE": (
+            "Les images ne devraient pas être beaucoup plus grandes que leur taille "
+            "d'affichage, écrans haute densité compris."
+        ),
         "html.description": (
             "Rapport d'audit d'accessibilité et d'éco-conception produit par a11y-eco"
         ),
@@ -303,6 +307,13 @@ CATALOG = Catalog(
         ),
         "rule.ECO-REDIRECTS": (
             "Redirection, l'une des {count} (maximum recommandé\N{NO-BREAK SPACE}: {limit})"
+        ),
+        "rule.ECO-IMAGE-SIZE": (
+            "Image de {width}\N{NO-BREAK SPACE}\N{MULTIPLICATION SIGN}\N{NO-BREAK SPACE}"
+            "{height}\N{NO-BREAK SPACE}px pour un affichage de "
+            "{shown_width}\N{NO-BREAK SPACE}\N{MULTIPLICATION SIGN}\N{NO-BREAK SPACE}"
+            "{shown_height}\N{NO-BREAK SPACE}px\N{NO-BREAK SPACE}: "
+            "environ {wasted} octets téléchargés inutilement"
         ),
     },
 )
