@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from a11y_eco.models import ImageSize
 
+HEADER_BYTES = 64 * 1024
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 _JPEG_FRAMES = frozenset(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC}
 _JPEG_STANDALONE = frozenset({0x01, 0xD8, *range(0xD0, 0xD8)})
@@ -18,7 +19,7 @@ def image_size(data: bytes) -> ImageSize | None:
     """Return the dimensions of an image, or None when they cannot be read.
 
     Args:
-        data: The first bytes of the file; 64 KB are enough for every format read.
+        data: The first bytes of the file; HEADER_BYTES are enough.
 
     Returns:
         The width and height in pixels, or None for another format, damaged or

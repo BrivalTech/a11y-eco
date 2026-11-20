@@ -129,6 +129,9 @@ class Download:
     headers: Mapping[str, str] = field(default_factory=dict, hash=False)
     """Response headers, names in lowercase; a repeated header has one value per line."""
 
+    image_size: ImageSize | None = None
+    """Dimensions read from the file, when it is an image in a format that can be read."""
+
     @property
     def ok(self) -> bool:
         """True when the file was received (status 2xx)."""

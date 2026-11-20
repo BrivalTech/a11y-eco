@@ -1,124 +1,148 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/brivaltech/a11y-eco/blob/main/schema/report-v1.schema.json",
-  "title": "a11y-eco report",
-  "description": "JSON report of a11y-eco, schema_version 1. Keys may be added without a new version; renaming or removing one requires a new version.",
-  "type": "object",
-  "required": ["schema_version", "tool", "language", "page", "summary", "metrics", "network", "findings"],
-  "additionalProperties": false,
-  "properties": {
-    "schema_version": { "const": 1 },
-    "tool": {
-      "type": "object",
-      "required": ["name", "version"],
-      "additionalProperties": false,
-      "properties": {
-        "name": { "const": "a11y-eco" },
-        "version": { "type": "string" }
-      }
-    },
-    "language": { "enum": ["en", "fr"] },
-    "page": {
-      "type": "object",
-      "required": ["location", "size"],
-      "additionalProperties": false,
-      "properties": {
-        "location": { "type": "string", "description": "Path of the file or URL of the page." },
-        "size": { "$ref": "#/$defs/count", "description": "Size of the HTML in bytes." }
-      }
-    },
-    "summary": {
-      "type": "object",
-      "required": ["error", "warning", "info"],
-      "additionalProperties": false,
-      "properties": {
-        "error": { "$ref": "#/$defs/count" },
-        "warning": { "$ref": "#/$defs/count" },
-        "info": { "$ref": "#/$defs/count" }
-      }
-    },
-    "metrics": {
-      "description": "Measures read from the HTML: minimum values.",
-      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/metrics" }]
-    },
-    "network": {
-      "description": "Measures taken with --fetch-resources.",
-      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/network" }]
-    },
-    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } }
-  },
-  "$defs": {
-    "count": { "type": "integer", "minimum": 0 },
-    "position": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1 }] },
-    "finding": {
-      "type": "object",
-      "required": ["rule_id", "severity", "reference", "message", "line", "column", "snippet", "details"],
-      "additionalProperties": false,
-      "properties": {
-        "rule_id": { "type": "string", "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)+$" },
-        "severity": { "enum": ["error", "warning", "info"] },
-        "reference": { "type": "string" },
-        "message": { "type": "string", "description": "Translated, for people." },
-        "line": { "$ref": "#/$defs/position" },
-        "column": { "$ref": "#/$defs/position" },
-        "snippet": { "type": "string" },
-        "details": {
-          "type": "object",
-          "description": "Raw numbers that describe the problem, such as count and limit.",
-          "additionalProperties": { "type": "integer" }
-        }
-      }
-    },
-    "metrics": {
-      "type": "object",
-      "required": ["requests", "resources_by_type", "deferred", "external", "domains", "dom_elements"],
-      "additionalProperties": false,
-      "properties": {
-        "requests": { "$ref": "#/$defs/count" },
-        "resources_by_type": {
-          "type": "object",
-          "required": ["stylesheet", "script", "image", "font", "media", "frame", "other"],
-          "additionalProperties": false,
-          "properties": {
-            "stylesheet": { "$ref": "#/$defs/count" },
-            "script": { "$ref": "#/$defs/count" },
-            "image": { "$ref": "#/$defs/count" },
-            "font": { "$ref": "#/$defs/count" },
-            "media": { "$ref": "#/$defs/count" },
-            "frame": { "$ref": "#/$defs/count" },
-            "other": { "$ref": "#/$defs/count" }
-          }
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/brivaltech/a11y-eco/blob/main/schema/report-v1.schema.json",
+    "title": "a11y-eco report",
+    "description": "JSON report of a11y-eco, schema_version 1. Keys may be added without a new version; renaming or removing one requires a new version.",
+    "type": "object",
+    "required": ["schema_version", "tool", "language", "page", "summary", "metrics", "network", "findings"],
+    "additionalProperties": false,
+    "properties": {
+        "schema_version": { "const": 1 },
+        "tool": {
+            "type": "object",
+            "required": ["name", "version"],
+            "additionalProperties": false,
+            "properties": {
+                "name": { "const": "a11y-eco" },
+                "version": { "type": "string" }
+            }
         },
-        "deferred": { "$ref": "#/$defs/count" },
-        "external": { "$ref": "#/$defs/count" },
-        "domains": { "$ref": "#/$defs/count" },
-        "dom_elements": { "$ref": "#/$defs/count" }
-      }
+        "language": { "enum": ["en", "fr"] },
+        "page": {
+            "type": "object",
+            "required": ["location", "size"],
+            "additionalProperties": false,
+            "properties": {
+                "location": { "type": "string", "description": "Path of the file or URL of the page." },
+                "size": { "$ref": "#/$defs/count", "description": "Size of the HTML in bytes." }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "required": ["error", "warning", "info"],
+            "additionalProperties": false,
+            "properties": {
+                "error": { "$ref": "#/$defs/count" },
+                "warning": { "$ref": "#/$defs/count" },
+                "info": { "$ref": "#/$defs/count" }
+            }
+        },
+        "metrics": {
+            "description": "Measures read from the HTML: minimum values.",
+            "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/metrics" }]
+        },
+        "network": {
+            "description": "Measures taken with --fetch-resources.",
+            "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/network" }]
+        },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } }
     },
-    "network": {
-      "type": "object",
-      "required": ["requests", "failed", "transferred", "complete", "skipped", "downloads"],
-      "additionalProperties": false,
-      "properties": {
-        "requests": { "$ref": "#/$defs/count" },
-        "failed": { "$ref": "#/$defs/count" },
-        "transferred": { "$ref": "#/$defs/count", "description": "Bytes, as sent by the servers." },
-        "complete": { "type": "boolean", "description": "False when transferred is a minimum." },
-        "skipped": { "$ref": "#/$defs/count" },
-        "downloads": { "type": "array", "items": { "$ref": "#/$defs/download" } }
-      }
-    },
-    "download": {
-      "type": "object",
-      "required": ["url", "status", "transferred", "complete", "redirected"],
-      "additionalProperties": false,
-      "properties": {
-        "url": { "type": "string" },
-        "status": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 100, "maximum": 599 }] },
-        "transferred": { "$ref": "#/$defs/count" },
-        "complete": { "type": "boolean" },
-        "redirected": { "type": "boolean" }
-      }
+    "$defs": {
+        "count": { "type": "integer", "minimum": 0 },
+        "position": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1 }] },
+        "finding": {
+            "type": "object",
+            "required": ["rule_id", "severity", "reference", "message", "line", "column", "snippet", "details"],
+            "additionalProperties": false,
+            "properties": {
+                "rule_id": { "type": "string", "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)+$" },
+                "severity": { "enum": ["error", "warning", "info"] },
+                "reference": { "type": "string" },
+                "message": { "type": "string", "description": "Translated, for people." },
+                "line": { "$ref": "#/$defs/position" },
+                "column": { "$ref": "#/$defs/position" },
+                "snippet": { "type": "string" },
+                "details": {
+                    "type": "object",
+                    "description": "Raw numbers that describe the problem, such as count and limit.",
+                    "additionalProperties": { "type": "integer" }
+                }
+            }
+        },
+        "metrics": {
+            "type": "object",
+            "required": ["requests", "resources_by_type", "deferred", "external", "domains", "dom_elements"],
+            "additionalProperties": false,
+            "properties": {
+                "requests": { "$ref": "#/$defs/count" },
+                "resources_by_type": {
+                    "type": "object",
+                    "required": ["stylesheet", "script", "image", "font", "media", "frame", "other"],
+                    "additionalProperties": false,
+                    "properties": {
+                        "stylesheet": { "$ref": "#/$defs/count" },
+                        "script": { "$ref": "#/$defs/count" },
+                        "image": { "$ref": "#/$defs/count" },
+                        "font": { "$ref": "#/$defs/count" },
+                        "media": { "$ref": "#/$defs/count" },
+                        "frame": { "$ref": "#/$defs/count" },
+                        "other": { "$ref": "#/$defs/count" }
+                    }
+                },
+                "deferred": { "$ref": "#/$defs/count" },
+                "external": { "$ref": "#/$defs/count" },
+                "domains": { "$ref": "#/$defs/count" },
+                "dom_elements": { "$ref": "#/$defs/count" }
+            }
+        },
+        "network": {
+            "type": "object",
+            "required": ["requests", "failed", "transferred", "complete", "skipped", "downloads"],
+            "additionalProperties": false,
+            "properties": {
+                "requests": { "$ref": "#/$defs/count" },
+                "failed": { "$ref": "#/$defs/count" },
+                "transferred": { "$ref": "#/$defs/count", "description": "Bytes, as sent by the servers." },
+                "complete": { "type": "boolean", "description": "False when transferred is a minimum." },
+                "skipped": { "$ref": "#/$defs/count" },
+                "downloads": { "type": "array", "items": { "$ref": "#/$defs/download" } }
+            }
+        },
+        "download": {
+            "type": "object",
+            "required": ["url", "status", "transferred", "complete", "redirected", "image_size"],
+            "additionalProperties": false,
+            "properties": {
+                "url": { "type": "string" },
+                "status": { "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 100, "maximum": 599 }] },
+                "transferred": { "$ref": "#/$defs/count" },
+                "complete": { "type": "boolean" },
+                "redirected": { "type": "boolean" },
+                "image_size": {
+                    "description": "Dimensions of the file in pixels, when it is an image that could be read.",
+                    "oneOf": [
+                        { "type": "null" },
+                        {
+                            "type": "object",
+                            "required": [
+                                "width",
+                                "height"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "width": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "height": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
     }
-  }
 }

@@ -9,6 +9,7 @@ from a11y_eco.i18n import CATALOGS, Language
 from a11y_eco.models import (
     Download,
     Finding,
+    ImageSize,
     Location,
     Metrics,
     NetworkMetrics,
@@ -37,7 +38,8 @@ FULL_REPORT = Report(
     network=NetworkMetrics(
         downloads=(
             Download("https://www.example.com/", status=200, transferred=2048),
-            Download("https://www.example.com/a.css"),  # failed: no status
+            Download("https://www.example.com/a.png", status=200, image_size=ImageSize(350, 300)),
+            Download("https://www.example.com/a.css"),
         ),
         skipped=1,
     ),

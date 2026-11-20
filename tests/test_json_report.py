@@ -122,6 +122,7 @@ def test_network_downloads_never_include_headers() -> None:
                 "transferred": 900,
                 "complete": True,
                 "redirected": False,
+                "image_size": None,
             },
             {
                 "url": "https://www.example.com/a.css",
@@ -129,6 +130,7 @@ def test_network_downloads_never_include_headers() -> None:
                 "transferred": 0,
                 "complete": True,
                 "redirected": False,
+                "image_size": None,
             },
         ],
     }
