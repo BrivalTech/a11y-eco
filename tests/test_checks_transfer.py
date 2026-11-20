@@ -2,10 +2,12 @@ import pytest
 
 from a11y_eco.checks import transfer
 from a11y_eco.checks.base import NetworkRule
+from a11y_eco.dom import parse_html
 from a11y_eco.models import Download, NetworkMetrics
 
 CSS = {"content-type": "text/css; charset=utf-8", "cache-control": "max-age=3600"}
 BIG = transfer.MIN_COMPRESSIBLE_BYTES
+ANY_PAGE = parse_html("", url="https://www.example.com/")
 
 
 def file(url: str = "https://www.example.com/a.css", **headers: str) -> Download:
@@ -15,11 +17,12 @@ def file(url: str = "https://www.example.com/a.css", **headers: str) -> Download
 
 def run(rule: NetworkRule, *downloads: Download) -> list[str]:
     """Return the addresses reported by a rule."""
-    return [finding.snippet for finding in rule.run(NetworkMetrics(downloads=downloads))]
+    return [finding.snippet for finding in rule.run(NetworkMetrics(downloads=downloads), ANY_PAGE)]
 
 
 def details(rule: NetworkRule, *downloads: Download) -> list[dict[str, int]]:
-    return [dict(finding.details) for finding in rule.run(NetworkMetrics(downloads=downloads))]
+    findings = rule.run(NetworkMetrics(downloads=downloads), ANY_PAGE)
+    return [dict(finding.details) for finding in findings]
 
 
 @pytest.mark.parametrize(

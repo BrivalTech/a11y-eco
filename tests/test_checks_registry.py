@@ -54,12 +54,14 @@ def test_violation_carries_details_to_the_finding() -> None:
 
 def test_network_decorator_builds_findings_that_point_to_the_address() -> None:
     @network_rule("TEST-NET", severity=Severity.INFO, reference="Test 2.1")
-    def failed_downloads(network: NetworkMetrics) -> list[Download | NetworkViolation]:
+    def failed_downloads(
+        network: NetworkMetrics, document: Document
+    ) -> list[Download | NetworkViolation]:
         failed = [download for download in network.downloads if not download.ok]
         return [NetworkViolation(failed[0], {"count": len(failed)}), *failed[1:]]
 
     network = NetworkMetrics(downloads=(Download("a"), Download("b", status=200), Download("c")))
-    findings = failed_downloads.run(network)
+    findings = failed_downloads.run(network, parse_html(""))
 
     assert [(f.rule_id, f.snippet, f.location) for f in findings] == [
         ("TEST-NET", "a", None),  # a download has no position in the HTML

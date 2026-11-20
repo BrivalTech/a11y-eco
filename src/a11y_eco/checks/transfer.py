@@ -11,6 +11,7 @@ from collections.abc import Iterator
 from urllib.parse import urlsplit
 
 from a11y_eco.checks.base import NetworkViolation, network_rule
+from a11y_eco.dom import Document
 from a11y_eco.models import Download, NetworkMetrics, Severity
 
 MAX_COOKIE_DOMAINS = 1
@@ -29,7 +30,7 @@ _TEXT_TYPES = frozenset(
 
 
 @network_rule("ECO-COMPRESSION", severity=Severity.WARNING, reference="RWEB_0076")
-def uncompressed_text(network: NetworkMetrics) -> Iterator[Download]:
+def uncompressed_text(network: NetworkMetrics, document: Document) -> Iterator[Download]:
     """HTML, CSS, JavaScript and SVG files should be sent compressed (gzip, Brotli…)."""
     for download in network.downloads:
         encoding = download.headers.get("content-encoding", "identity").strip().lower()
@@ -43,7 +44,7 @@ def uncompressed_text(network: NetworkMetrics) -> Iterator[Download]:
 
 
 @network_rule("ECO-CACHE-HEADERS", severity=Severity.WARNING, reference="RWEB_0075")
-def missing_cache_headers(network: NetworkMetrics) -> Iterator[Download]:
+def missing_cache_headers(network: NetworkMetrics, document: Document) -> Iterator[Download]:
     """Static files should say how long to keep them, with Expires or Cache-Control."""
     for download in network.downloads:
         if (
@@ -55,7 +56,9 @@ def missing_cache_headers(network: NetworkMetrics) -> Iterator[Download]:
 
 
 @network_rule("ECO-COOKIE-DOMAINS", severity=Severity.WARNING, reference="RWEB_0081")
-def static_files_with_cookies(network: NetworkMetrics) -> Iterator[NetworkViolation]:
+def static_files_with_cookies(
+    network: NetworkMetrics, document: Document
+) -> Iterator[NetworkViolation]:
     """Static files should come from at most one domain that uses cookies.
 
     A domain uses cookies as soon as one of its responses sets one: the browser then
@@ -75,7 +78,7 @@ def static_files_with_cookies(network: NetworkMetrics) -> Iterator[NetworkViolat
 
 
 @network_rule("ECO-REDIRECTS", severity=Severity.WARNING, reference="RWEB_0112")
-def too_many_redirects(network: NetworkMetrics) -> Iterator[NetworkViolation]:
+def too_many_redirects(network: NetworkMetrics, document: Document) -> Iterator[NetworkViolation]:
     """Loading the page should not go through more than one redirection."""
     redirected = [download for download in network.downloads if download.redirected]
 

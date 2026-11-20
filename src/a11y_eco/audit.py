@@ -37,7 +37,7 @@ def audit(
     network = fetch(document) if fetch else None
 
     if network is not None:
-        findings += [finding for rule in network_rules for finding in rule.run(network)]
+        findings += [finding for rule in network_rules for finding in rule.run(network, document)]
 
     return Report(
         location=source.location,
